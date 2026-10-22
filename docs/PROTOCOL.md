@@ -42,6 +42,8 @@ The payload starts with a command byte, followed by a type byte that selects the
 | Touch panel | `D6 D1` | `D7\|D9 D1 00 v` | `D8 D1 00 v` |
 | Multipoint | `D6 D2` | `D7\|D9 D2 00 v` | `D8 D2 00 v` |
 | Pause when taken off | `F6 01` | `F7\|F9 01 v` | `F8 01 v` |
+| Speak-to-chat | `F6 0C` (capability: `F0 0C`) | `F7\|F9 0C v 01` | `F8 0C v` |
+| Speak-to-chat detail | `FA 0C` | `FB\|FD 0C sensitivity timeout` | `FC 0C sensitivity timeout` (sensitivity `00` auto, `01` high, `02` low; timeout `00` short ≈5 s, `01` standard ≈15 s, `02` long ≈30 s, `03` never) |
 | Automatic power off | `26 05` (options: `20 05`) | `27\|29 05 active timer` | `28 05 active 00` (`10` when taken off, `11` never) |
 | Voice guidance (table 2) | `46 01` | `47\|49 01 v language` | `48 01 v` |
 | Power off | — | — (the link drops) | `24 03 01` (type `03` power off, `01` user request) |

@@ -260,6 +260,17 @@ fn build_ui(app: &adw::Application) {
     g.add(&amb_voice);
     groups.push(g);
 
+    // Speak-to-chat
+    let g = group(&page, "Hablar para chatear", None);
+    let stc = adw::SwitchRow::builder()
+        .title("Hablar para chatear")
+        .subtitle("Empieza a hablar con los auriculares puestos para iniciar una conversación")
+        .build();
+    g.add(&stc);
+    let (stc_sens, stc_sens_values) = combo_row(&g, "Sensibilidad de detección de voz", protocol::STC_SENSITIVITY);
+    let (stc_time, stc_time_values) = combo_row(&g, "Tiempo hasta que finaliza el modo", protocol::STC_TIMEOUT);
+    groups.push(g);
+
     // Sound quality: band 0 is Clear Bass; show it after the bands
     let g = group(&page, "Calidad de sonido / volumen", Some("Ecualizador (−10 a +10)"));
     let mut eq: Vec<Option<gtk::Scale>> = vec![None; protocol::EQ_BANDS.len()];
@@ -321,12 +332,15 @@ fn build_ui(app: &adw::Application) {
             (multipoint, "multipoint"),
             (touch, "touch_panel"),
             (pause, "pause_on_removal"),
+            (stc, "speak_to_chat"),
             (voice.clone(), "voice_guidance"),
         ],
         combos: vec![
             (conn_mode, "connection_mode", conn_values),
             (nc_button, "nc_amb_button", nc_values),
             (apo, "auto_power_off", apo_values),
+            (stc_sens, "speak_to_chat_sensitivity", stc_sens_values),
+            (stc_time, "speak_to_chat_timeout", stc_time_values),
         ],
         fw,
         voice,

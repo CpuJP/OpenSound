@@ -15,6 +15,7 @@
 |---|---|
 | Live status | Battery level and charging, active codec (SBC / AAC / LDAC…), model and firmware |
 | Ambient sound control | Noise cancelling / Ambient sound / Off, ambient level (1–20), focus on voice |
+| Speak-to-chat | On/off, voice detection sensitivity (auto, high, low), time until the mode ends (about 5 s, 15 s, 30 s or never) |
 | Sound | 5-band equalizer (400, 1k, 2.5k, 6.3k, 16k Hz) from −10 to +10, plus Clear Bass |
 | Connection | Connect to 2 devices simultaneously (multipoint), Bluetooth connection quality |
 | Controls | [NC/AMB] button behaviour, touch sensor control panel, pause when headphones are taken off |

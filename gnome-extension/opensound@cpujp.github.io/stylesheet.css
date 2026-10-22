@@ -110,3 +110,27 @@
 .opensound-power-box {
   spacing: 8px;
 }
+
+.opensound-chip-box {
+  spacing: 6px;
+}
+
+.opensound-chips {
+  spacing: 6px;
+}
+
+.opensound-chip {
+  padding: 6px 4px;
+  border-radius: 10px;
+  background-color: rgba(127, 127, 127, 0.15);
+}
+
+.opensound-chip:hover,
+.opensound-chip:focus {
+  background-color: rgba(127, 127, 127, 0.28);
+}
+
+.opensound-chip:checked {
+  background-color: -st-accent-color;
+  color: -st-accent-fg-color;
+}

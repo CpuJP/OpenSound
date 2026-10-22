@@ -26,6 +26,15 @@ pub const NC_AMB_BUTTON: &[(u8, &str)] = &[
     (0x03, "NC / Desactivado"),
     (0x04, "Ambiente / Desactivado"),
 ];
+/// Speak-to-chat voice detection sensitivity.
+pub const STC_SENSITIVITY: &[(u8, &str)] = &[(0x00, "Automática"), (0x01, "Alta"), (0x02, "Baja")];
+/// Time without speech before speak-to-chat ends.
+pub const STC_TIMEOUT: &[(u8, &str)] = &[
+    (0x00, "Corto (unos 5 s)"),
+    (0x01, "Estándar (unos 15 s)"),
+    (0x02, "Largo (unos 30 s)"),
+    (0x03, "No cerrar automáticamente"),
+];
 pub const CONNECTION_MODE: &[(u8, &str)] =
     &[(0x00, "Prioridad a la calidad de sonido"), (0x01, "Prioridad a la conexión estable")];
 pub const LANGUAGES: &[(u8, &str)] = &[
@@ -83,6 +92,8 @@ pub const INIT_QUERIES: &[(u8, &[u8])] = &[
     (DT_MDR, &[0xD6, 0xD1]),       // touch panel (general setting 1)
     (DT_MDR, &[0xD6, 0xD2]),       // multipoint (general setting 2)
     (DT_MDR, &[0xF6, 0x01]),       // pause when headphones are removed
+    (DT_MDR, &[0xF6, 0x0C]),       // speak-to-chat
+    (DT_MDR, &[0xFA, 0x0C]),       // speak-to-chat sensitivity and timeout
     (DT_MDR, &[0x20, 0x05]),       // auto power off capability
     (DT_MDR, &[0x26, 0x05]),       // auto power off
     (DT_MDR2, &[0x46, 0x01]),      // voice guidance
@@ -146,6 +157,12 @@ pub struct State {
     pub multipoint: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub pause_on_removal: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub speak_to_chat: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub speak_to_chat_sensitivity: Option<u8>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub speak_to_chat_timeout: Option<u8>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub auto_power_off_options: Option<Vec<u8>>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -217,6 +234,11 @@ pub fn parse(data_type: u8, p: &[u8], state: &mut State) -> bool {
         (DT_MDR, [0xD7 | 0xD9, 0xD1, _, v, ..]) => state.touch_panel = Some(on(*v)),
         (DT_MDR, [0xD7 | 0xD9, 0xD2, _, v, ..]) => state.multipoint = Some(on(*v)),
         (DT_MDR, [0xF7 | 0xF9, 0x01, v, ..]) => state.pause_on_removal = Some(on(*v)),
+        (DT_MDR, [0xF7 | 0xF9, 0x0C, v, ..]) => state.speak_to_chat = Some(on(*v)),
+        (DT_MDR, [0xFB | 0xFD, 0x0C, sensitivity, timeout, ..]) => {
+            state.speak_to_chat_sensitivity = Some(*sensitivity);
+            state.speak_to_chat_timeout = Some(*timeout);
+        }
         (DT_MDR, [0x21, 0x05, count, options @ ..]) => {
             state.auto_power_off_options = Some(options.iter().take(*count as usize).copied().collect());
         }
@@ -300,6 +322,16 @@ pub fn build(key: &str, value: &Value, state: &State) -> Result<(u8, Vec<u8>), S
         "touch_panel" => (DT_MDR, vec![0xD8, 0xD1, 0x00, flag(as_bool(value)?)]),
         "multipoint" => (DT_MDR, vec![0xD8, 0xD2, 0x00, flag(as_bool(value)?)]),
         "pause_on_removal" => (DT_MDR, vec![0xF8, 0x01, flag(as_bool(value)?)]),
+        "speak_to_chat" => (DT_MDR, vec![0xF8, 0x0C, flag(as_bool(value)?)]),
+        // sensitivity and timeout are always written together
+        "speak_to_chat_sensitivity" => {
+            let timeout = state.speak_to_chat_timeout.unwrap_or(0x01);
+            (DT_MDR, vec![0xFC, 0x0C, one_of(value, STC_SENSITIVITY, key)?, timeout])
+        }
+        "speak_to_chat_timeout" => {
+            let sensitivity = state.speak_to_chat_sensitivity.unwrap_or(0x00);
+            (DT_MDR, vec![0xFC, 0x0C, sensitivity, one_of(value, STC_TIMEOUT, key)?])
+        }
         // second byte is a remembered timer; the WH-1000XM5 has none, so send 0x00
         "auto_power_off" => (DT_MDR, vec![0x28, 0x05, one_of(value, AUTO_POWER_OFF, key)?, 0x00]),
         "alert_response" => {
@@ -546,6 +578,28 @@ mod tests {
         assert_eq!(build("nc_amb_button", &json!(4), &st).unwrap().1, hex("68 30 04"));
         assert_eq!(build("voice_guidance", &json!(false), &st).unwrap(), (DT_MDR2, hex("48 01 01")));
         assert_eq!(build("power_off", &json!(true), &st).unwrap(), (DT_MDR, hex("24 03 01")));
+        assert_eq!(build("speak_to_chat", &json!(false), &st).unwrap().1, hex("f8 0c 01"));
+        let st = State { speak_to_chat_sensitivity: Some(2), speak_to_chat_timeout: Some(3), ..Default::default() };
+        assert_eq!(build("speak_to_chat_sensitivity", &json!(1), &st).unwrap().1, hex("fc 0c 01 03"));
+        assert_eq!(build("speak_to_chat_timeout", &json!(0), &st).unwrap().1, hex("fc 0c 02 00"));
+    }
+
+    #[test]
+    fn parse_speak_to_chat() {
+        // captured from a WH-1000XM5: enabled, automatic sensitivity, standard timeout
+        let mut st = State::default();
+        parse(DT_MDR, &hex("f7 0c 00 01"), &mut st);
+        parse(DT_MDR, &hex("fb 0c 00 01"), &mut st);
+        assert_eq!(
+            (st.speak_to_chat, st.speak_to_chat_sensitivity, st.speak_to_chat_timeout),
+            (Some(true), Some(0), Some(1))
+        );
+        parse(DT_MDR, &hex("f9 0c 01 01"), &mut st);
+        parse(DT_MDR, &hex("fd 0c 02 03"), &mut st);
+        assert_eq!(
+            (st.speak_to_chat, st.speak_to_chat_sensitivity, st.speak_to_chat_timeout),
+            (Some(false), Some(2), Some(3))
+        );
     }
 
     #[test]
@@ -555,6 +609,8 @@ mod tests {
         assert!(build("multipoint", &json!(1), &st).is_err());
         assert!(build("power_off", &json!(false), &st).is_err());
         assert!(build("power_off", &json!(1), &st).is_err());
+        assert!(build("speak_to_chat_sensitivity", &json!(3), &st).is_err());
+        assert!(build("speak_to_chat_timeout", &json!(4), &st).is_err());
         assert!(build("auto_power_off", &json!(0x12), &st).is_err());
         assert!(build("connection_mode", &json!(2), &st).is_err());
         assert!(build("nc_amb_button", &json!(0), &st).is_err());
@@ -572,6 +628,9 @@ mod tests {
             ("connection_mode", json!(1), 0xE9),
             ("nc_amb_button", json!(3), 0x69),
             ("auto_power_off", json!(0x11), 0x29),
+            ("speak_to_chat", json!(false), 0xF9),
+            ("speak_to_chat_sensitivity", json!(2), 0xFD),
+            ("speak_to_chat_timeout", json!(3), 0xFD),
         ];
         for (key, value, ntfy) in cases {
             let (dt, mut p) = build(key, &value, &st).unwrap();

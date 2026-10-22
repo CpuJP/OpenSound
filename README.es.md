@@ -12,6 +12,7 @@
 |---|---|
 | Estado en vivo | Batería y carga, códec activo (SBC / AAC / LDAC…), modelo y firmware |
 | Control de sonido ambiental | Supresión de ruido / Sonido ambiente / Desactivado, nivel de ambiente (1–20), enfocar en la voz |
+| Hablar para chatear | Activar o desactivar, sensibilidad de detección de voz (automática, alta, baja), tiempo hasta que finaliza el modo (unos 5 s, 15 s, 30 s o nunca) |
 | Sonido | Ecualizador de 5 bandas (400, 1k, 2.5k, 6.3k y 16k Hz) de −10 a +10, y Clear Bass |
 | Conexión | Conectar a 2 dispositivos a la vez (multipunto), calidad de conexión Bluetooth |
 | Controles | Ajustes de operación [NC/AMB], panel de control con sensor táctil, pausa al quitarse los auriculares |
