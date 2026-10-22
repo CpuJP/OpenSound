@@ -1,6 +1,6 @@
 # MDR v2 protocol notes
 
-These are interoperability notes for the control protocol used by the WH-1000XM5. They were verified against a WH-1000XM5 running firmware 2.5.1. All values are hexadecimal.
+These are interoperability notes for the control protocol used by the WH-1000XM5. They were written for a non-profit project, because no official option exists for Linux. They were verified against a WH-1000XM5 running firmware 2.5.1. All values are hexadecimal.
 
 ## Transport
 
@@ -26,7 +26,7 @@ Each data frame is acknowledged with an empty `ACK` frame whose `seq` is `1 − 
 
 ## Commands
 
-The payload starts with a command byte, followed by an "inquired type" byte that selects the function. Each function group has `GET`, `RET` (reply), `SET` and `NTFY` (unsolicited notification) variants. `NTFY` is also sent after a successful `SET`.
+The payload starts with a command byte, followed by a type byte that selects the function. Each function group has `GET`, `RET` (reply), `SET` and `NTFY` (unsolicited notification) variants. `NTFY` is also sent after a successful `SET`.
 
 | Function | Request | Reply / notification | Write |
 |---|---|---|---|
@@ -53,11 +53,11 @@ Equalizer presets `A0`–`A5` are user-editable (custom and user settings 1–5)
 
 ## Confirmation alerts
 
-Some changes disconnect or restart the headphones, such as multipoint, the touch panel or connection quality. The device asks the controlling app for confirmation before applying them:
+Some changes disconnect or restart the headphones, such as multipoint, the touch panel or connection quality. The device asks the controlling host for confirmation before applying them:
 
-1. After connecting, the app enables alerts with `94 00 00`.
+1. After connecting, the host enables alerts with `94 00 00`.
 2. When a change needs confirmation, the device sends `99 00 <message> <kind>`. Kind `00` is informational only; kind `01` expects yes or no.
-3. The app replies `98 00 <message> <01 yes | 00 no>`.
+3. The host replies `98 00 <message> <01 yes | 00 no>`.
 
 If alerts are not enabled, the device silently rejects these changes and notifies the previous value.
 

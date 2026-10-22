@@ -65,7 +65,7 @@ class Window(Adw.ApplicationWindow):
         # Sound quality
         g = self._group(page, "Calidad de sonido / volumen", "Ecualizador (−10 a +10)")
         self.eq_scales = [None] * len(protocol.EQ_BANDS)
-        for i in (1, 2, 3, 4, 5, 0):  # band 0 is Clear Bass; the official app shows it last
+        for i in (1, 2, 3, 4, 5, 0):  # band 0 is Clear Bass; show it after the bands
             band = protocol.EQ_BANDS[i]
             self.eq_scales[i] = self._scale_row(g, band if i == 0 else f"{band} Hz", -10, 10, None)
             self.eq_scales[i].connect("value-changed", self._on_eq)

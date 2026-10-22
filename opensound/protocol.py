@@ -7,10 +7,10 @@ Table 1 frames use data type 0x0C, table 2 frames use 0x0E.
 from .transport import DT_MDR, DT_MDR2
 
 CODECS = {0x01: "SBC", 0x02: "AAC", 0x10: "LDAC", 0x20: "aptX", 0x21: "aptX HD", 0x30: "LC3"}
-# AutoPowerOffWearingDetectionElements
+# auto power off options (type 0x05)
 AUTO_POWER_OFF = {0x00: "5 min", 0x01: "30 min", 0x02: "60 min", 0x03: "180 min", 0x04: "15 min",
                   0x10: "Al quitarse los auriculares", 0x11: "No apagar"}
-# system.param.Function values usable by the NC/AMB button (table1 NCASM type 0x30)
+# functions the [NC/AMB] button can cycle through (type 0x30)
 NC_AMB_BUTTON = {0x01: "NC / Ambiente / Desactivado", 0x02: "NC / Ambiente",
                  0x03: "NC / Desactivado", 0x04: "Ambiente / Desactivado"}
 CONNECTION_MODE = {0x00: "Prioridad a la calidad de sonido", 0x01: "Prioridad a la conexión estable"}
@@ -18,8 +18,8 @@ LANGUAGES = {0: "Indefinido", 1: "Inglés", 2: "Francés", 3: "Alemán", 4: "Esp
              6: "Portugués", 7: "Neerlandés", 8: "Sueco", 9: "Finlandés", 10: "Ruso", 11: "Japonés",
              13: "Portugués (Brasil)", 15: "Coreano", 16: "Turco", 0xF0: "Chino"}
 EQ_BANDS = ("Clear Bass", "400", "1k", "2.5k", "6.3k", "16k")
-CUSTOM_PRESETS = range(0xA0, 0xA6)  # CUSTOM, USER_SETTING1..5
-# alert.param.AlertMessageType: confirmations the headset asks for before disruptive changes
+CUSTOM_PRESETS = range(0xA0, 0xA6)  # editable presets: custom and user 1..5
+# alert message IDs: confirmations the headset asks for before disruptive changes
 ALERTS = {
     0x00: "Cambiar la calidad de conexión desconectará y reconectará los auriculares.",
     0x06: "Al cambiar la conexión a 2 dispositivos, los auriculares se reconectarán y LDAC no estará disponible.",
@@ -36,8 +36,8 @@ ALERTS = {
 
 # (data type, payload) queried after connecting
 INIT_QUERIES = [
-    (DT_MDR, b"\x00\x00"),      # CONNECT_GET_PROTOCOL_INFO (handshake)
-    (DT_MDR, b"\x94\x00\x00"),  # ALERT_SET_STATUS fixed messages ENABLE; without it the headset rejects changes that need confirmation
+    (DT_MDR, b"\x00\x00"),      # protocol info (handshake)
+    (DT_MDR, b"\x94\x00\x00"),  # enable alerts; without it the headset rejects changes that need confirmation
     (DT_MDR, b"\x04\x01"),      # model name
     (DT_MDR, b"\x04\x02"),      # firmware version
     (DT_MDR, b"\x22\x00"),      # battery
@@ -56,7 +56,7 @@ INIT_QUERIES = [
 
 
 def _onoff(b):
-    return b == 0  # Sony OnOffSettingValue / GsSettingValue: ON=0, OFF=1
+    return b == 0  # protocol booleans: ON=0, OFF=1
 
 
 def parse(data_type, p, state):
@@ -135,7 +135,7 @@ def build(key, value, state):
     if key == "auto_power_off":
         if value not in AUTO_POWER_OFF:
             raise ValueError("unknown auto_power_off value")
-        # second byte is the timer remembered by the app; XM5 has no timer, the official app sends 0x00
+        # second byte is a remembered timer; the WH-1000XM5 has none, so send 0x00
         return DT_MDR, bytes((0x28, 0x05, value, 0x00))
     if key == "alert_response":
         alert = state.get("alert")

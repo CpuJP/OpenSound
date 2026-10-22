@@ -15,7 +15,7 @@ class TransportTest(unittest.TestCase):
         self.assertEqual(transport.decode(raw[1:-1]), (DT_MDR, 1, payload))
 
     def test_known_frame(self):
-        # CONNECT_GET_PROTOCOL_INFO handshake frame
+        # protocol info handshake frame
         self.assertEqual(transport.encode(DT_MDR, 0, b"\x00\x00").hex(), "3e0c000000000200000e3c")
 
     def test_bad_checksum(self):
