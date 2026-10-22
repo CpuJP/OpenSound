@@ -6,14 +6,6 @@
 *.apks
 *.dex
 
-# Python
-__pycache__/
-*.py[cod]
-.venv/
-venv/
-.pytest_cache/
-.ruff_cache/
-
 # Editors / OS
 .idea/
 .vscode/
@@ -25,3 +17,7 @@ graphify-out/
 
 # Claude Code personal settings
 .claude/settings.local.json
+
+# Rust build output
+/target/
+/dist/

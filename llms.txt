@@ -1,6 +1,6 @@
 # OpenSound
 
-> Unofficial, GPL-3.0-or-later Linux controller for WH-1000XM5 headphones. A Python daemon speaks the MDR v2 protocol over Bluetooth RFCOMM and exposes a session D-Bus API, used by a GTK 4 / libadwaita app and a GNOME Shell extension. Non-profit; built because no official Linux option exists. Not affiliated with Sony.
+> Unofficial, GPL-3.0-or-later Linux controller for WH-1000XM5 headphones. A Rust daemon speaks the MDR v2 protocol over Bluetooth RFCOMM and exposes a session D-Bus API, used by a GTK 4 / libadwaita app and a GNOME Shell extension. Non-profit; built because no official Linux option exists. Not affiliated with Sony.
 
 ## Docs
 
@@ -12,10 +12,12 @@
 
 ## Source
 
-- [opensound/transport.py](opensound/transport.py): RFCOMM link and frame codec
-- [opensound/protocol.py](opensound/protocol.py): pure request builders and reply parsers
-- [opensound/daemon.py](opensound/daemon.py): D-Bus service
-- [opensound/app.py](opensound/app.py): GTK app
+- [crates/opensound-core/src/frame.rs](crates/opensound-core/src/frame.rs): frame codec
+- [crates/opensound-core/src/protocol.rs](crates/opensound-core/src/protocol.rs): pure request builders, reply parser and state model
+- [crates/opensound-daemon/src/link.rs](crates/opensound-daemon/src/link.rs): RFCOMM link with ACK handling
+- [crates/opensound-daemon/src/main.rs](crates/opensound-daemon/src/main.rs): D-Bus service
+- [crates/opensound-gtk/src/main.rs](crates/opensound-gtk/src/main.rs): GTK app
+- [packaging/opensound.spec](packaging/opensound.spec): Fedora package
 - [gnome-extension/opensound@cpujp.github.io/extension.js](gnome-extension/opensound@cpujp.github.io/extension.js): GNOME Shell extension
 
 ## Optional

@@ -4,6 +4,28 @@ All notable changes to this project are documented in this file. The format foll
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-10-22
+
+### Changed
+
+- The daemon and the app are rewritten in Rust (`opensound-core`, `opensound-daemon` and the `opensound` GTK 4 / libadwaita app). The D-Bus API is unchanged.
+- The app ID is now `io.github.cpujp.OpenSound.App`, so it no longer collides with the daemon's bus name.
+
+### Added
+
+- D-Bus activation: the daemon starts on demand when the app or the GNOME Shell extension needs it.
+- Fedora RPM package and a generic Linux tarball, published automatically for each release.
+- AppStream metadata.
+- 55 unit and integration tests: framing, protocol parsing and building, JSON contract, SDP, the ACK and retransmission logic against a simulated headset, and D-Bus method validation.
+
+### Fixed
+
+- The GNOME Shell extension no longer throws an error when the daemon is not running.
+
+### Removed
+
+- The Python implementation.
+
 ## [0.1.0] - 2026-10-21
 
 ### Added

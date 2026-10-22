@@ -24,27 +24,45 @@ Los cambios hechos en los auriculares, por ejemplo con los botones, se ven al in
 
 ## Requisitos
 
-- Linux con BlueZ, sesión de usuario de systemd y GNOME 48–50. Desarrollado en Fedora.
-- Python ≥ 3.10, PyGObject, GTK 4 y libadwaita ≥ 1.7. Fedora Workstation los trae instalados.
+- Linux con BlueZ, sesión de usuario de systemd, GTK 4 y libadwaita ≥ 1.7. Sirven Fedora 42+, Debian 13, Ubuntu 25.04+ y Arch Linux.
+- GNOME Shell 48–50 para la extensión de la barra superior. La app funciona en cualquier escritorio.
 - Auriculares emparejados y conectados desde los ajustes de Bluetooth del sistema.
 
 ## Instalación
 
+Descarga los archivos de la [última versión](https://github.com/CpuJP/OpenSound/releases/latest).
+
+**Fedora (RPM):**
+
 ```sh
-git clone https://github.com/CpuJP/OpenSound.git
-cd OpenSound
+sudo dnf install ./opensound-*.x86_64.rpm
+```
+
+**Otras distribuciones (binarios precompilados, por usuario, sin root):**
+
+```sh
+tar xzf opensound-*-linux.tar.gz
+cd opensound-*-linux
 sh install.sh
 ```
 
-El instalador es por usuario, no necesita root e instala todo en `~/.local`:
+**Desde el código fuente** (requiere Rust ≥ 1.92 y los paquetes de desarrollo de GTK 4 y libadwaita):
 
-- `opensound.service`: servicio de usuario de systemd que mantiene la conexión con los auriculares.
+```sh
+git clone https://github.com/CpuJP/OpenSound.git
+cd OpenSound
+sh install.sh        # compila con cargo e instala en ~/.local
+```
+
+Cualquiera de los métodos instala lo mismo:
+
+- `opensound-daemon`: el servicio que mantiene la conexión con los auriculares. D-Bus lo inicia cuando hace falta y la unidad de usuario de systemd `opensound.service` lo mantiene activo.
 - La app **OpenSound**, en el menú de aplicaciones o con el comando `opensound`.
 - La extensión de GNOME Shell `opensound@cpujp.github.io`. Añade la batería a la barra superior y un botón en Ajustes rápidos.
 
 En Wayland, cierra sesión y vuelve a entrar una vez. Después ejecuta `gnome-extensions enable opensound@cpujp.github.io`.
 
-Para desinstalar todo, ejecuta `sh uninstall.sh`.
+Para desinstalar, ejecuta `sudo dnf remove opensound` si usaste el RPM, o `sh uninstall.sh` en los demás casos.
 
 ## Arquitectura y protocolo
 
@@ -53,7 +71,7 @@ Auriculares ──RFCOMM (SPP)── daemon opensound ──D-Bus de sesión─�
                                                                  └── Extensión GNOME
 ```
 
-Los auriculares aceptan una sola conexión de control. El daemon es el único proceso que la abre, y las interfaces son clientes D-Bus. La API y el protocolo están documentados en [README.md](README.md#architecture) y [docs/PROTOCOL.md](docs/PROTOCOL.md).
+Los auriculares aceptan una sola conexión de control. El daemon es el único proceso que la abre, y las interfaces son clientes D-Bus. El daemon y la app están escritos en Rust. La extensión está en JavaScript (GJS), porque GNOME Shell solo carga extensiones en ese lenguaje. La API y el protocolo están documentados en [README.md](README.md#architecture) y [docs/PROTOCOL.md](docs/PROTOCOL.md).
 
 ## Limitaciones conocidas
 

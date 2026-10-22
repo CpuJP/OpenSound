@@ -27,36 +27,60 @@ Changes made on the headphones themselves, for example with the buttons, appear 
 
 ## Requirements
 
-- Linux with BlueZ, a systemd user session and GNOME 48–50. Developed on Fedora.
-- Python ≥ 3.10, PyGObject, GTK 4, libadwaita ≥ 1.7. These are preinstalled on Fedora Workstation.
+- Linux with BlueZ, a systemd user session, GTK 4 and libadwaita ≥ 1.7. Fedora 42+, Debian 13, Ubuntu 25.04+ and Arch Linux qualify.
+- GNOME Shell 48–50 for the top-bar extension. The app works on any desktop.
 - The headphones must be paired and connected through the normal Bluetooth settings.
 
 ## Installation
 
+Download the files from the [latest release](https://github.com/CpuJP/OpenSound/releases/latest).
+
+**Fedora (RPM):**
+
 ```sh
-git clone https://github.com/CpuJP/OpenSound.git
-cd OpenSound
+sudo dnf install ./opensound-*.x86_64.rpm
+```
+
+**Other distributions (prebuilt binaries, per user, no root):**
+
+```sh
+tar xzf opensound-*-linux.tar.gz
+cd opensound-*-linux
 sh install.sh
 ```
 
-The installer works per user, needs no root, and installs everything under `~/.local`:
+**From source** (needs Rust ≥ 1.92 and the GTK 4 / libadwaita development packages):
 
-- `opensound.service`: a systemd user service that owns the connection to the headphones.
+```sh
+git clone https://github.com/CpuJP/OpenSound.git
+cd OpenSound
+sh install.sh        # builds with cargo and installs under ~/.local
+```
+
+Each method installs the same components:
+
+- `opensound-daemon`: the service that owns the connection to the headphones. D-Bus starts it on demand, and the systemd user unit `opensound.service` keeps it running.
 - The **OpenSound** app, in your application menu, or run `opensound`.
 - The GNOME Shell extension `opensound@cpujp.github.io`. It adds a battery indicator to the top bar and a Quick Settings toggle.
 
 On Wayland, log out and back in once. Then run `gnome-extensions enable opensound@cpujp.github.io`.
 
-To remove everything, run `sh uninstall.sh`.
+To uninstall, run `sudo dnf remove opensound` for the RPM, or `sh uninstall.sh` for the other methods.
 
 ## Architecture
 
 ```
-Headphones ──RFCOMM (SPP)── opensound daemon ──session D-Bus──┬── GTK app
-                                                              └── GNOME Shell extension
+Headphones ──RFCOMM (SPP)── opensound-daemon (Rust) ──session D-Bus──┬── opensound GTK app (Rust)
+                                                                     └── GNOME Shell extension (GJS)
 ```
 
-The headphones accept a single control connection. The daemon is the only process that opens it, and the UIs are D-Bus clients.
+The headphones accept a single control connection. The daemon is the only process that opens it, and the UIs are D-Bus clients. GNOME Shell only loads extensions written in JavaScript (GJS), so the extension is the only part that is not Rust.
+
+| Crate | Content |
+|---|---|
+| `crates/opensound-core` | Framing, protocol parser and builders, state model. No I/O |
+| `crates/opensound-daemon` | Bluetooth sockets, SDP, ACK handling, D-Bus service |
+| `crates/opensound-gtk` | GTK 4 / libadwaita app (`opensound` binary) |
 
 D-Bus API on bus name `io.github.cpujp.OpenSound`, object `/io/github/cpujp/OpenSound`:
 
@@ -71,9 +95,12 @@ The protocol is documented in [docs/PROTOCOL.md](docs/PROTOCOL.md).
 ## Development
 
 ```sh
-python3 -m unittest discover -s tests -t .   # unit tests, no hardware needed
-python3 -m opensound.daemon                  # run the daemon in the foreground
-python3 -m opensound                         # run the app from the source tree
+cargo test                        # all tests, no hardware needed
+cargo clippy --all-targets -- -D warnings
+cargo run -p opensound-daemon     # run the daemon in the foreground
+cargo run -p opensound-gtk        # run the app
+sh packaging/build-rpm.sh         # build the Fedora RPM into dist/
+sh packaging/build-tarball.sh     # build the generic Linux tarball into dist/
 ```
 
 See [CONTRIBUTING.md](CONTRIBUTING.md). Do **not** commit third-party proprietary software, firmware or code derived from it. The [`.gitignore`](.gitignore) already excludes them.

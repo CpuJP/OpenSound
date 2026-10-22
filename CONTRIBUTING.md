@@ -25,22 +25,24 @@ Other headphones from the same family may use the same protocol with different c
 
 ## Development setup
 
+Install Rust ≥ 1.92 and the GTK development packages (`sudo dnf install gtk4-devel libadwaita-devel` on Fedora), then:
+
 ```sh
 git clone https://github.com/CpuJP/OpenSound.git
 cd OpenSound
-python3 -m unittest discover -s tests -t .
+cargo test
+cargo clippy --all-targets -- -D warnings
 ```
 
 Code layout:
 
 | Path | Content |
 |---|---|
-| `opensound/transport.py` | SDP lookup, RFCOMM link, framing, ACK handling |
-| `opensound/protocol.py` | Request builders and reply parsers (no I/O) |
-| `opensound/daemon.py` | D-Bus service that owns the link |
-| `opensound/app.py` | GTK 4 / libadwaita app |
-| `gnome-extension/` | GNOME Shell extension |
-| `tests/` | Unit tests based on captured payloads |
+| `crates/opensound-core` | Framing and protocol (no I/O), with most of the tests |
+| `crates/opensound-daemon` | Bluetooth sockets, SDP, ACK handling, D-Bus service |
+| `crates/opensound-gtk` | GTK 4 / libadwaita app |
+| `gnome-extension/` | GNOME Shell extension (GJS) |
+| `data/`, `packaging/` | System integration files and Fedora / tarball packaging |
 
 ## AI-assisted contributions
 
@@ -53,6 +55,6 @@ AI coding agents are welcome. Agent instructions live in [AGENTS.md](AGENTS.md),
 ## Pull requests
 
 1. Keep each change focused, and match the style of the surrounding code.
-2. Add or update tests in `tests/` for every protocol change. Payloads captured from real hardware are preferred.
-3. Run the tests before opening the pull request.
+2. Add or update tests for every protocol change. Payloads captured from real hardware are preferred.
+3. Run `cargo fmt`, `cargo clippy --all-targets -- -D warnings` and `cargo test` before opening the pull request.
 4. Describe what you tested on real hardware, including the model and firmware.
