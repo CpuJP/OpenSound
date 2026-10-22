@@ -1,0 +1,15 @@
+[package]
+name = "opensound-daemon"
+description = "OpenSound D-Bus service that owns the Bluetooth control link"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+authors.workspace = true
+rust-version.workspace = true
+
+[dependencies]
+opensound-core.workspace = true
+serde_json.workspace = true
+libc = "0.2"
+zbus = { version = "5", default-features = false, features = ["blocking-api", "async-io"] }
