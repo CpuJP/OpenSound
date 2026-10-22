@@ -32,7 +32,7 @@ Changes made on the headphones themselves, for example with the buttons, appear 
 - Linux with BlueZ, a systemd user session, GTK 4 and libadwaita ≥ 1.7. Fedora 42+, Debian 13, Ubuntu 25.04+ and Arch Linux qualify.
 - GNOME Shell 48–50 for the top-bar extension. The app works on any desktop.
 - The headphones must be paired and connected through the normal Bluetooth settings.
-- Optional: `speech-dispatcher` (`spd-say`) for the spoken daily greeting.
+- Optional: `speech-dispatcher` (`spd-say`) or Piper (see [Natural voice](#natural-voice-for-the-daily-greeting-optional)) for the spoken daily greeting.
 
 ## Installation
 
@@ -69,6 +69,21 @@ Each method installs the same components:
 On Wayland, log out and back in once. Then run `gnome-extensions enable opensound@cpujp.github.io`.
 
 To uninstall, run `sudo dnf remove opensound` for the RPM, or `sh uninstall.sh` for the other methods.
+
+### Natural voice for the daily greeting (optional)
+
+The spoken greeting uses `spd-say` by default, which sounds robotic. For a natural voice, install [Piper](https://github.com/rhasspy/piper), an offline neural text-to-speech engine, with a Spanish voice. OpenSound finds it automatically in `~/.local/share/opensound/piper`; nothing needs root.
+
+```sh
+mkdir -p ~/.local/share/opensound/piper && cd ~/.local/share/opensound/piper
+# Piper engine (use piper_linux_aarch64.tar.gz on ARM)
+curl -L https://github.com/rhasspy/piper/releases/download/2023.11.14-2/piper_linux_x86_64.tar.gz | tar xz
+# Latin American Spanish voice "claude" (high quality, about 60 MB)
+curl -LO https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/es/es_MX/claude/high/es_MX-claude-high.onnx
+curl -LO https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/es/es_MX/claude/high/es_MX-claude-high.onnx.json
+```
+
+Then press **Probar saludo** in the app (System section). To try another voice from the [Piper voice list](https://huggingface.co/rhasspy/piper-voices), keep a single `.onnx` file and its `.onnx.json` in that folder. Each voice has its own license, listed in its model card. To go back to `spd-say`, delete the folder.
 
 ## Architecture
 

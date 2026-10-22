@@ -29,7 +29,7 @@ Los cambios hechos en los auriculares, por ejemplo con los botones, se ven al in
 - Linux con BlueZ, sesión de usuario de systemd, GTK 4 y libadwaita ≥ 1.7. Sirven Fedora 42+, Debian 13, Ubuntu 25.04+ y Arch Linux.
 - GNOME Shell 48–50 para la extensión de la barra superior. La app funciona en cualquier escritorio.
 - Auriculares emparejados y conectados desde los ajustes de Bluetooth del sistema.
-- Opcional: `speech-dispatcher` (`spd-say`) para el saludo de voz diario.
+- Opcional: `speech-dispatcher` (`spd-say`) o Piper (ver [Voz natural](#voz-natural-para-el-saludo-diario-opcional)) para el saludo de voz diario.
 
 ## Instalación
 
@@ -66,6 +66,21 @@ Cualquiera de los métodos instala lo mismo:
 En Wayland, cierra sesión y vuelve a entrar una vez. Después ejecuta `gnome-extensions enable opensound@cpujp.github.io`.
 
 Para desinstalar, ejecuta `sudo dnf remove opensound` si usaste el RPM, o `sh uninstall.sh` en los demás casos.
+
+### Voz natural para el saludo diario (opcional)
+
+El saludo de voz usa `spd-say` por defecto, que suena robótico. Para una voz natural, instala [Piper](https://github.com/rhasspy/piper), un motor de voz neuronal que funciona sin conexión, con una voz en español. OpenSound lo encuentra solo en `~/.local/share/opensound/piper`; no hace falta root.
+
+```sh
+mkdir -p ~/.local/share/opensound/piper && cd ~/.local/share/opensound/piper
+# Motor Piper (en ARM usa piper_linux_aarch64.tar.gz)
+curl -L https://github.com/rhasspy/piper/releases/download/2023.11.14-2/piper_linux_x86_64.tar.gz | tar xz
+# Voz en español latino "claude" (alta calidad, unos 60 MB)
+curl -LO https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/es/es_MX/claude/high/es_MX-claude-high.onnx
+curl -LO https://huggingface.co/rhasspy/piper-voices/resolve/v1.0.0/es/es_MX/claude/high/es_MX-claude-high.onnx.json
+```
+
+Después pulsa **Probar saludo** en la app (sección Sistema). Para probar otra voz de la [lista de voces de Piper](https://huggingface.co/rhasspy/piper-voices), deja en esa carpeta un solo archivo `.onnx` con su `.onnx.json`. Cada voz tiene su propia licencia, indicada en su ficha. Para volver a `spd-say`, borra la carpeta.
 
 ## Arquitectura y protocolo
 
