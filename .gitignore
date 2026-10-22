@@ -1,0 +1,27 @@
+# Proprietary third-party material: never commit APKs or their extracted contents
+songpal_extracted/
+*.apk
+*.apkm
+*.xapk
+*.apks
+*.dex
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+.pytest_cache/
+.ruff_cache/
+
+# Editors / OS
+.idea/
+.vscode/
+*.swp
+.DS_Store
+
+# Local tooling output
+graphify-out/
+
+# Claude Code personal settings
+.claude/settings.local.json

@@ -1,0 +1,14 @@
+name: Feature or device request
+description: Suggest a feature or support for another headphone model
+labels: [enhancement]
+body:
+  - type: textarea
+    id: what
+    attributes:
+      label: What would you like?
+    validations:
+      required: true
+  - type: input
+    id: model
+    attributes:
+      label: Headphone model and firmware (if relevant)
