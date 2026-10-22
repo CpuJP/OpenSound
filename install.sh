@@ -17,7 +17,7 @@ else
     SRC=target/release
 fi
 
-# Remove the legacy Python version (0.1.x).
+# Remove files left by version 0.1.x.
 rm -rf "$DATA/opensound" "$DATA/applications/io.github.cpujp.OpenSound.desktop"
 
 mkdir -p "$BIN" "$UNITS" "$DATA/applications" "$DATA/metainfo" "$DATA/dbus-1/services" "$DATA/gnome-shell/extensions/$UUID"

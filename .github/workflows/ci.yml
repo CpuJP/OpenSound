@@ -56,4 +56,4 @@ jobs:
           cp gnome-extension/opensound@cpujp.github.io/extension.js /tmp/extension.mjs
           node --check /tmp/extension.mjs
       - name: Validate metadata
-        run: python3 -c "import json; json.load(open('gnome-extension/opensound@cpujp.github.io/metadata.json'))"
+        run: node -e "JSON.parse(require('fs').readFileSync('gnome-extension/opensound@cpujp.github.io/metadata.json', 'utf8'))"

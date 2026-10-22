@@ -24,7 +24,7 @@ All notable changes to this project are documented in this file. The format foll
 
 ### Removed
 
-- The Python implementation.
+- The previous 0.1.x implementation.
 
 ## [0.1.0] - 2026-10-21
 
