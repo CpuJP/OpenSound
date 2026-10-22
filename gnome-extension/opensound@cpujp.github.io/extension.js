@@ -5,6 +5,7 @@ import Clutter from 'gi://Clutter';
 import Gio from 'gi://Gio';
 import GLib from 'gi://GLib';
 import GObject from 'gi://GObject';
+import Shell from 'gi://Shell';
 import St from 'gi://St';
 
 import * as Main from 'resource:///org/gnome/shell/ui/main.js';
@@ -33,6 +34,18 @@ const MODES = [
 const ICON = 'audio-headphones-symbolic';
 const AMBIENT_MAX = 20;
 const VERTICAL = Clutter.Orientation.VERTICAL;
+// Same thresholds as the daemon notifications.
+const BATTERY_LOW = 20;
+const BATTERY_CRITICAL = 10;
+
+// Equalizer presets in protocol order: [id, name].
+const EQ_PRESETS = [
+    [0x00, 'Desactivado'], [0x10, 'Alegre'], [0x11, 'Emocionado'], [0x12, 'Suave'],
+    [0x13, 'Relajado'], [0x14, 'Canto'], [0x15, 'Incremento de agudos'],
+    [0x16, 'Incremento de graves'], [0x17, 'Locución'], [0xA0, 'Manual'],
+    [0xA1, 'Personalizado 1'], [0xA2, 'Personalizado 2'],
+];
+const eqName = id => (EQ_PRESETS.find(p => p[0] === id) ?? [null, '—'])[1];
 
 // Speak-to-chat options: [value, short label], in protocol byte order.
 const STC_SENSITIVITY = [[0, 'Auto'], [1, 'Alta'], [2, 'Baja']];
@@ -88,7 +101,13 @@ class PanelButton extends PanelMenu.Button {
     _init(ext) {
         super._init(0.5, 'OpenSound');
         const box = new St.BoxLayout({style_class: 'panel-status-menu-box'});
-        box.add_child(new St.Icon({icon_name: ICON, style_class: 'system-status-icon'}));
+        this._panelIcon = new St.Icon({icon_name: ICON, style_class: 'system-status-icon'});
+        this._panelBattery = new St.Icon({style_class: 'system-status-icon'});
+        // low battery warning, orange; red when critical
+        this._warning = new St.Icon({icon_name: 'dialog-warning-symbolic', style_class: 'system-status-icon opensound-warning'});
+        box.add_child(this._warning);
+        box.add_child(this._panelIcon);
+        box.add_child(this._panelBattery);
         this._label = new St.Label({y_align: Clutter.ActorAlign.CENTER, style_class: 'opensound-panel-label'});
         box.add_child(this._label);
         this.add_child(box);
@@ -114,15 +133,18 @@ class PanelButton extends PanelMenu.Button {
         battery.add_child(this._batteryLabel);
         battery.add_child(this._batteryState);
         header.add_child(battery);
+        this._headerBattery = battery;
         this.menu.addMenuItem(header);
 
         const barItem = staticItem();
         this._bar = new BarLevel({style_class: 'barlevel opensound-bar', x_expand: true});
         barItem.add_child(this._bar);
         this.menu.addMenuItem(barItem);
+        this._barItem = barItem;
 
         // Noise control: one card button per mode
-        this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem('Control de ruido'));
+        this._noiseTitle = new PopupMenu.PopupSeparatorMenuItem('Control de ruido');
+        this.menu.addMenuItem(this._noiseTitle);
         const modesItem = staticItem();
         const row = new St.BoxLayout({style_class: 'opensound-modes', x_expand: true});
         this._modeButtons = {};
@@ -137,6 +159,7 @@ class PanelButton extends PanelMenu.Button {
         }
         modesItem.add_child(row);
         this.menu.addMenuItem(modesItem);
+        this._modesItem = modesItem;
 
         // Ambient options, shown only in ambient mode
         this._ambientItem = new PopupMenu.PopupBaseMenuItem({activate: false});
@@ -149,13 +172,46 @@ class PanelButton extends PanelMenu.Button {
             (this._levelLabel.text = `${Math.round(this._slider.value * AMBIENT_MAX)}`));
         this.menu.addMenuItem(this._ambientItem);
         this._voiceItem = new PopupMenu.PopupSwitchMenuItem('Voz enfocada', false);
-        this._voiceItem.connect('toggled', (_i, on) => ext.set('ambient_voice', on));
+        this._voiceItem.connect('toggled', (_i, on) => !this._syncing && ext.set('ambient_voice', on));
         this.menu.addMenuItem(this._voiceItem);
 
+        // Equalizer: "< name >" steps through the presets the headset offers, wrapping around
+        this._eqTitle = new PopupMenu.PopupSeparatorMenuItem('Ecualizador');
+        this.menu.addMenuItem(this._eqTitle);
+        this._eqIds = EQ_PRESETS.map(p => p[0]);
+        this._eqItem = staticItem();
+        const eqRow = new St.BoxLayout({x_expand: true, style_class: 'opensound-eq-row'});
+        const arrow = (icon, delta, label) => {
+            const b = new St.Button({
+                child: new St.Icon({icon_name: icon, style_class: 'popup-menu-icon'}),
+                style_class: 'opensound-arrow',
+                can_focus: true,
+                accessible_name: label,
+            });
+            b.connect('clicked', () => {
+                const n = this._eqIds.length;
+                const i = Math.max(0, this._eqIds.indexOf(this._eqCurrent));
+                ext.set('eq_preset', this._eqIds[(i + delta + n) % n]);
+            });
+            return b;
+        };
+        this._eqLabel = new St.Label({
+            style_class: 'opensound-eq-name',
+            x_expand: true,
+            x_align: Clutter.ActorAlign.CENTER,
+            y_align: Clutter.ActorAlign.CENTER,
+        });
+        eqRow.add_child(arrow('go-previous-symbolic', -1, 'Ecualizador anterior'));
+        eqRow.add_child(this._eqLabel);
+        eqRow.add_child(arrow('go-next-symbolic', 1, 'Ecualizador siguiente'));
+        this._eqItem.add_child(eqRow);
+        this.menu.addMenuItem(this._eqItem);
+
         // Speak-to-chat: switch plus its options, shown while enabled
-        this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem('Hablar para chatear'));
+        this._stcTitle = new PopupMenu.PopupSeparatorMenuItem('Hablar para chatear');
+        this.menu.addMenuItem(this._stcTitle);
         this._stcItem = new PopupMenu.PopupSwitchMenuItem('Activar', false);
-        this._stcItem.connect('toggled', (_i, on) => ext.set('speak_to_chat', on));
+        this._stcItem.connect('toggled', (_i, on) => !this._syncing && ext.set('speak_to_chat', on));
         this.menu.addMenuItem(this._stcItem);
         this._stcSensitivity = chipRow(ext, 'Sensibilidad de detección de voz', 'speak_to_chat_sensitivity', STC_SENSITIVITY);
         this._stcTimeout = chipRow(ext, 'Tiempo hasta que finaliza', 'speak_to_chat_timeout', STC_TIMEOUT);
@@ -183,6 +239,7 @@ class PanelButton extends PanelMenu.Button {
         });
         powerItem.add_child(this._power);
         this.menu.addMenuItem(powerItem);
+        this._powerItem = powerItem;
         this.menu.connect('open-state-changed', (_m, open) => !open && this._disarm());
         this.connect('destroy', () => {
             if (this._armTimeout)
@@ -219,14 +276,34 @@ class PanelButton extends PanelMenu.Button {
         }
         const level = s.battery;
         const known = level !== undefined;
+        // what the user chose to see (settings stored by the daemon; missing means shown)
+        const show = key => s[key] !== false;
+        this._panelIcon.icon_name = s.panel_icon || ICON;
+        this._panelIcon.visible = show('panel_show_icon');
+        this._panelBattery.icon_name = batteryIcon(level ?? 0, s.charging);
+        this._panelBattery.visible = known && s.panel_show_battery_icon === true;
         this._label.text = known ? `${level}%` : '';
+        this._label.visible = known && show('panel_show_percent');
+        const low = known && !s.charging && level <= BATTERY_LOW;
+        this._warning.visible = low;
+        if (low && level <= BATTERY_CRITICAL)
+            this._warning.add_style_class_name('critical');
+        else
+            this._warning.remove_style_class_name('critical');
+        // never leave an empty button in the top bar
+        if (!this._panelIcon.visible && !this._panelBattery.visible && !this._label.visible)
+            this._panelIcon.visible = true;
+        this._headerBattery.visible = this._barItem.visible = show('widget_show_battery');
+        const noise = show('widget_show_noise');
+        this._noiseTitle.visible = this._modesItem.visible = noise;
+        this._powerItem.visible = show('widget_show_power');
         this._title.text = s.model || s.name || 'Auriculares';
         this._subtitle.text = [s.codec, modeLabel(s.nc_mode)].filter(Boolean).join(' · ');
         this._batteryLabel.text = known ? `${level}%` : '—';
         this._batteryIcon.icon_name = batteryIcon(level ?? 0, s.charging);
         this._chargingLabel.text = s.charging ? 'Cargando' : 'Batería';
         this._bar.value = (level ?? 0) / 100;
-        if (known && level <= 20 && !s.charging)
+        if (known && level <= BATTERY_LOW && !s.charging)
             this._bar.add_style_class_name('low');
         else
             this._bar.remove_style_class_name('low');
@@ -234,18 +311,33 @@ class PanelButton extends PanelMenu.Button {
         for (const [mode, button] of Object.entries(this._modeButtons))
             button.checked = mode === s.nc_mode;
         const ambient = s.nc_mode === 'ambient';
-        this._ambientItem.visible = ambient;
-        this._voiceItem.visible = ambient;
+        this._ambientItem.visible = this._voiceItem.visible = noise && ambient;
         if (!this._dragging)
             this._slider.value = (s.ambient_level ?? 0) / AMBIENT_MAX;
+        // setToggleState emits "toggled" on GNOME 50; _syncing keeps that from echoing back to the headset
+        this._syncing = true;
         this._voiceItem.setToggleState(!!s.ambient_voice);
+        this._syncing = false;
 
-        const stc = s.speak_to_chat !== undefined;
-        this._stcItem.visible = stc;
+        const stc = s.speak_to_chat !== undefined && show('widget_show_speak_to_chat');
+        this._stcTitle.visible = this._stcItem.visible = stc;
+        this._syncing = true;
         this._stcItem.setToggleState(!!s.speak_to_chat);
-        this._stcSensitivity.item.visible = this._stcTimeout.item.visible = !!s.speak_to_chat;
+        this._syncing = false;
+        this._stcSensitivity.item.visible = this._stcTimeout.item.visible = stc && !!s.speak_to_chat;
         this._stcSensitivity.update(s.speak_to_chat_sensitivity);
         this._stcTimeout.update(s.speak_to_chat_timeout);
+
+        if (s.eq_presets?.length > 1)
+            this._eqIds = s.eq_presets;
+        this._eqTitle.visible = this._eqItem.visible = s.eq_preset !== undefined && show('widget_show_equalizer');
+        this._eqCurrent = s.eq_preset;
+        this._eqLabel.text = eqName(s.eq_preset);
+        // any preset other than Off is highlighted like a selected mode
+        if (s.eq_preset !== undefined && s.eq_preset !== 0)
+            this._eqLabel.add_style_class_name('active');
+        else
+            this._eqLabel.remove_style_class_name('active');
     }
 });
 
@@ -283,7 +375,7 @@ class HeadphonesToggle extends QuickSettings.QuickMenuToggle {
 
     update(s) {
         this._state = s;
-        this.visible = !!s.connected;
+        this.visible = !!s.connected && s.widget_quick_settings !== false;
         if (!s.connected)
             return;
         this.title = s.model || s.name || 'Auriculares';
@@ -377,9 +469,9 @@ export default class OpenSoundExtension extends Extension {
     }
 
     openApp() {
-        const app = Gio.DesktopAppInfo.new('io.github.cpujp.OpenSound.App.desktop');
+        const app = Shell.AppSystem.get_default().lookup_app('io.github.cpujp.OpenSound.App.desktop');
         if (app)
-            app.launch([], null);
+            app.activate();
         else
             GLib.spawn_command_line_async('opensound');
         Main.panel.closeQuickSettings();

@@ -13,14 +13,15 @@
 
 | Area | Settings |
 |---|---|
-| Live status | Battery level and charging, active codec (SBC / AAC / LDAC…), model and firmware |
+| Live status | Battery level and charging, low battery notifications (20 % and 10 %), active codec (SBC / AAC / LDAC…), model and firmware |
 | Ambient sound control | Noise cancelling / Ambient sound / Off, ambient level (1–20), focus on voice |
 | Speak-to-chat | On/off, voice detection sensitivity (auto, high, low), time until the mode ends (about 5 s, 15 s, 30 s or never) |
-| Sound | 5-band equalizer (400, 1k, 2.5k, 6.3k, 16k Hz) from −10 to +10, plus Clear Bass |
+| Sound | Equalizer presets (Off, Bright, Excited, Mellow, Relaxed, Vocal, Treble boost, Bass boost, Speech, Manual, Custom 1 and 2), "Find your equalizer" guided listening test, 5-band equalizer (400, 1k, 2.5k, 6.3k, 16k Hz) from −10 to +10 plus Clear Bass |
 | Connection | Connect to 2 devices simultaneously (multipoint), Bluetooth connection quality |
-| Controls | [NC/AMB] button behaviour, touch sensor control panel, pause when headphones are taken off |
+| Controls | [NC/AMB] button behaviour, double and triple tap function of the headset, touch sensor control panel, pause when headphones are taken off |
 | Power | Automatic power off, power off from the app or the extension |
-| System | Firmware version, voice guidance on/off (language is shown) |
+| System | Firmware version, voice guidance on/off (language is shown), spoken greeting with the date the first time you wear them each day (Spanish) |
+| GNOME Shell widget | Choose the top-bar icon, show or hide the battery percentage and battery icon, and pick which sections the card shows |
 
 Changes made on the headphones themselves, for example with the buttons, appear in the UI immediately. When the headphones ask for a confirmation before a disruptive change, such as a reconnect after toggling multipoint, OpenSound shows the same confirmation dialog.
 
@@ -31,6 +32,7 @@ Changes made on the headphones themselves, for example with the buttons, appear 
 - Linux with BlueZ, a systemd user session, GTK 4 and libadwaita ≥ 1.7. Fedora 42+, Debian 13, Ubuntu 25.04+ and Arch Linux qualify.
 - GNOME Shell 48–50 for the top-bar extension. The app works on any desktop.
 - The headphones must be paired and connected through the normal Bluetooth settings.
+- Optional: `speech-dispatcher` (`spd-say`) for the spoken daily greeting.
 
 ## Installation
 

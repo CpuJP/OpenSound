@@ -12,8 +12,10 @@ Everything is Rust (Cargo workspace), except the GNOME Shell extension, which mu
 - `crates/opensound-core/src/protocol.rs`: pure functions with no I/O. `parse(data_type, payload, &mut State)` updates the state from a device message. `build(key, &Value, &State)` returns the `(data_type, payload)` that changes a setting. `INIT_QUERIES` lists what is read after connecting. `State` serializes to the JSON shared over D-Bus.
 - `crates/opensound-daemon/src/bt.rs`: libc Bluetooth sockets (L2CAP for SDP, RFCOMM) and the SDP request/response codec.
 - `crates/opensound-daemon/src/link.rs`: one control link: stop-and-wait sends with ACK and retries, and a reader thread.
+- `crates/opensound-daemon/src/settings.rs`: settings stored on this computer (`~/.config/opensound/settings.json`): the daily spoken greeting and the GNOME Shell extension layout. They are merged into the state JSON and changed with the same `Set` method.
 - `crates/opensound-daemon/src/main.rs`: session D-Bus service `io.github.cpujp.OpenSound` (zbus). A single worker thread owns the link, polls BlueZ for a connected headset and sends queued frames. Methods: `GetState() → s`, `Set(s key, s value_json)`, signal `StateChanged(s)`.
 - `crates/opensound-gtk/src/main.rs`: GTK 4 / libadwaita app (`opensound`, app ID `io.github.cpujp.OpenSound.App`), a D-Bus client of the daemon.
+- `crates/opensound-gtk/src/find_eq.rs`: the "Encontrar su ecualizador" listening test.
 - `gnome-extension/opensound@cpujp.github.io/`: GNOME Shell 48–50 extension (ES modules), a D-Bus client of the daemon.
 - `data/`: systemd user unit, D-Bus activation file, desktop file and AppStream metainfo.
 - `packaging/`: Fedora spec and the RPM / tarball build scripts used by CI and releases.

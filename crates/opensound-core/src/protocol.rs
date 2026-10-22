@@ -55,6 +55,23 @@ pub const LANGUAGES: &[(u8, &str)] = &[
     (16, "Turco"),
     (0xF0, "Chino"),
 ];
+/// Equalizer presets the WH-1000XM5 offers (capability `51 00`).
+pub const EQ_PRESETS: &[(u8, &str)] = &[
+    (0x00, "Desactivado"),
+    (0x10, "Alegre"),
+    (0x11, "Emocionado"),
+    (0x12, "Suave"),
+    (0x13, "Relajado"),
+    (0x14, "Canto"),
+    (0x15, "Incremento de agudos"),
+    (0x16, "Incremento de graves"),
+    (0x17, "Locución"),
+    (0xA0, "Manual"),
+    (0xA1, "Personalizado 1"),
+    (0xA2, "Personalizado 2"),
+];
+/// What a double or triple tap on the [NC/AMB] button does on the headset itself (type 0x0D).
+pub const BUTTON_FUNCTIONS: &[(u8, &str)] = &[(0x00, "Sin función"), (0x01, "Spotify")];
 pub const EQ_BANDS: [&str; 6] = ["Clear Bass", "400", "1k", "2.5k", "6.3k", "16k"];
 /// Editable equalizer presets: custom and user 1..5.
 pub const CUSTOM_PRESETS: std::ops::RangeInclusive<u8> = 0xA0..=0xA5;
@@ -87,6 +104,7 @@ pub const INIT_QUERIES: &[(u8, &[u8])] = &[
     (DT_MDR, &[0x12, 0x02]),       // codec
     (DT_MDR, &[0x66, 0x17]),       // NC / ambient sound
     (DT_MDR, &[0x66, 0x30]),       // NC/AMB button
+    (DT_MDR, &[0x50, 0x00]),       // equalizer presets
     (DT_MDR, &[0x56, 0x00]),       // equalizer
     (DT_MDR, &[0xE6, 0x00]),       // connection quality
     (DT_MDR, &[0xD6, 0xD1]),       // touch panel (general setting 1)
@@ -94,6 +112,7 @@ pub const INIT_QUERIES: &[(u8, &[u8])] = &[
     (DT_MDR, &[0xF6, 0x01]),       // pause when headphones are removed
     (DT_MDR, &[0xF6, 0x0C]),       // speak-to-chat
     (DT_MDR, &[0xFA, 0x0C]),       // speak-to-chat sensitivity and timeout
+    (DT_MDR, &[0xF6, 0x0D]),       // [NC/AMB] double and triple tap
     (DT_MDR, &[0x20, 0x05]),       // auto power off capability
     (DT_MDR, &[0x26, 0x05]),       // auto power off
     (DT_MDR2, &[0x46, 0x01]),      // voice guidance
@@ -150,6 +169,8 @@ pub struct State {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub eq: Option<Vec<i8>>,
     #[serde(skip_serializing_if = "Option::is_none")]
+    pub eq_presets: Option<Vec<u8>>,
+    #[serde(skip_serializing_if = "Option::is_none")]
     pub connection_mode: Option<u8>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub touch_panel: Option<bool>,
@@ -157,6 +178,10 @@ pub struct State {
     pub multipoint: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub pause_on_removal: Option<bool>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub button_double: Option<u8>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub button_triple: Option<u8>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub speak_to_chat: Option<bool>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -229,6 +254,19 @@ pub fn parse(data_type: u8, p: &[u8], state: &mut State) -> bool {
         (DT_MDR, [0x57 | 0x59, 0x00, preset, count, bands @ ..]) => {
             state.eq_preset = Some(*preset);
             state.eq = Some(bands.iter().take(*count as usize).map(|&b| b as i8 - 10).collect());
+        }
+        (DT_MDR, [0x51, 0x00, _bands, _levels, count, entries @ ..]) => {
+            // entries: preset id, name length, name bytes
+            let (mut ids, mut rest) = (Vec::new(), entries);
+            while let ([id, len, tail @ ..], true) = (rest, ids.len() < *count as usize) {
+                ids.push(*id);
+                rest = tail.get(*len as usize..).unwrap_or_default();
+            }
+            state.eq_presets = Some(ids);
+        }
+        (DT_MDR, [0xF7 | 0xF9, 0x0D, 0x02, double, triple, ..]) => {
+            state.button_double = Some(*double);
+            state.button_triple = Some(*triple);
         }
         (DT_MDR, [0xE7 | 0xE9, 0x00, mode, ..]) => state.connection_mode = Some(*mode),
         (DT_MDR, [0xD7 | 0xD9, 0xD1, _, v, ..]) => state.touch_panel = Some(on(*v)),
@@ -316,6 +354,15 @@ pub fn build(key: &str, value: &Value, state: &State) -> Result<(u8, Vec<u8>), S
             let mut p = vec![0x58, 0x00, preset, bands.len() as u8];
             p.extend(bands.iter().map(|v| (v + 10) as u8));
             (DT_MDR, p)
+        }
+        "eq_preset" => (DT_MDR, vec![0x58, 0x00, one_of(value, EQ_PRESETS, key)?, 0x00]),
+        "button_double" => {
+            let triple = state.button_triple.unwrap_or(0);
+            (DT_MDR, vec![0xF8, 0x0D, 0x02, one_of(value, BUTTON_FUNCTIONS, key)?, triple])
+        }
+        "button_triple" => {
+            let double = state.button_double.unwrap_or(0);
+            (DT_MDR, vec![0xF8, 0x0D, 0x02, double, one_of(value, BUTTON_FUNCTIONS, key)?])
         }
         "nc_amb_button" => (DT_MDR, vec![0x68, 0x30, one_of(value, NC_AMB_BUTTON, key)?]),
         "connection_mode" => (DT_MDR, vec![0xE8, 0x00, one_of(value, CONNECTION_MODE, key)?]),
@@ -579,9 +626,28 @@ mod tests {
         assert_eq!(build("voice_guidance", &json!(false), &st).unwrap(), (DT_MDR2, hex("48 01 01")));
         assert_eq!(build("power_off", &json!(true), &st).unwrap(), (DT_MDR, hex("24 03 01")));
         assert_eq!(build("speak_to_chat", &json!(false), &st).unwrap().1, hex("f8 0c 01"));
+        assert_eq!(build("eq_preset", &json!(0x10), &st).unwrap().1, hex("58 00 10 00"));
+        let taps = State { button_double: Some(1), button_triple: Some(0), ..Default::default() };
+        assert_eq!(build("button_triple", &json!(1), &taps).unwrap().1, hex("f8 0d 02 01 01"));
+        assert_eq!(build("button_double", &json!(0), &taps).unwrap().1, hex("f8 0d 02 00 00"));
         let st = State { speak_to_chat_sensitivity: Some(2), speak_to_chat_timeout: Some(3), ..Default::default() };
         assert_eq!(build("speak_to_chat_sensitivity", &json!(1), &st).unwrap().1, hex("fc 0c 01 03"));
         assert_eq!(build("speak_to_chat_timeout", &json!(0), &st).unwrap().1, hex("fc 0c 02 00"));
+    }
+
+    #[test]
+    fn parse_eq_presets_and_buttons() {
+        // captured from a WH-1000XM5
+        let mut st = State::default();
+        parse(
+            DT_MDR,
+            &hex("51 00 06 15 0c 00 00 10 00 11 00 12 00 13 00 14 00 15 00 16 00 17 00 a0 00 a1 00 a2 00"),
+            &mut st,
+        );
+        let ids: Vec<u8> = EQ_PRESETS.iter().map(|(id, _)| *id).collect();
+        assert_eq!(st.eq_presets, Some(ids));
+        parse(DT_MDR, &hex("f7 0d 02 01 00"), &mut st);
+        assert_eq!((st.button_double, st.button_triple), (Some(1), Some(0)));
     }
 
     #[test]
@@ -611,6 +677,8 @@ mod tests {
         assert!(build("power_off", &json!(1), &st).is_err());
         assert!(build("speak_to_chat_sensitivity", &json!(3), &st).is_err());
         assert!(build("speak_to_chat_timeout", &json!(4), &st).is_err());
+        assert!(build("eq_preset", &json!(0x01), &st).is_err());
+        assert!(build("button_double", &json!(9), &st).is_err());
         assert!(build("auto_power_off", &json!(0x12), &st).is_err());
         assert!(build("connection_mode", &json!(2), &st).is_err());
         assert!(build("nc_amb_button", &json!(0), &st).is_err());
@@ -629,6 +697,8 @@ mod tests {
             ("nc_amb_button", json!(3), 0x69),
             ("auto_power_off", json!(0x11), 0x29),
             ("speak_to_chat", json!(false), 0xF9),
+            ("button_double", json!(1), 0xF9),
+            ("button_triple", json!(1), 0xF9),
             ("speak_to_chat_sensitivity", json!(2), 0xFD),
             ("speak_to_chat_timeout", json!(3), 0xFD),
         ];

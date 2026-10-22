@@ -10,14 +10,15 @@
 
 | Área | Ajustes |
 |---|---|
-| Estado en vivo | Batería y carga, códec activo (SBC / AAC / LDAC…), modelo y firmware |
+| Estado en vivo | Batería y carga, avisos de batería baja (20 % y 10 %), códec activo (SBC / AAC / LDAC…), modelo y firmware |
 | Control de sonido ambiental | Supresión de ruido / Sonido ambiente / Desactivado, nivel de ambiente (1–20), enfocar en la voz |
 | Hablar para chatear | Activar o desactivar, sensibilidad de detección de voz (automática, alta, baja), tiempo hasta que finaliza el modo (unos 5 s, 15 s, 30 s o nunca) |
-| Sonido | Ecualizador de 5 bandas (400, 1k, 2.5k, 6.3k y 16k Hz) de −10 a +10, y Clear Bass |
+| Sonido | Presets de ecualizador (Desactivado, Alegre, Emocionado, Suave, Relajado, Canto, Incremento de agudos, Incremento de graves, Locución, Manual, Personalizado 1 y 2), asistente "Encontrar su ecualizador", ecualizador de 5 bandas (400, 1k, 2.5k, 6.3k y 16k Hz) de −10 a +10 y Clear Bass |
 | Conexión | Conectar a 2 dispositivos a la vez (multipunto), calidad de conexión Bluetooth |
-| Controles | Ajustes de operación [NC/AMB], panel de control con sensor táctil, pausa al quitarse los auriculares |
+| Controles | Ajustes de operación [NC/AMB], acción de botón rápido con doble y triple toque (función de los auriculares), panel de control con sensor táctil, pausa al quitarse los auriculares |
 | Energía | Apagado automático, apagar desde la app o la extensión |
-| Sistema | Versión de firmware, guía de voz (activar o desactivar; el idioma se muestra) |
+| Sistema | Versión de firmware, guía de voz (activar o desactivar; el idioma se muestra), saludo de voz con la fecha la primera vez que te los pones cada día |
+| Widget de GNOME | Elegir el icono de la barra superior, mostrar u ocultar el porcentaje y el icono de batería, y qué secciones muestra la tarjeta |
 
 Los cambios hechos en los auriculares, por ejemplo con los botones, se ven al instante en la interfaz. Algunos cambios reinician la conexión, como el del multipunto. Para ellos, los auriculares piden una confirmación y OpenSound la muestra como diálogo.
 
@@ -28,6 +29,7 @@ Los cambios hechos en los auriculares, por ejemplo con los botones, se ven al in
 - Linux con BlueZ, sesión de usuario de systemd, GTK 4 y libadwaita ≥ 1.7. Sirven Fedora 42+, Debian 13, Ubuntu 25.04+ y Arch Linux.
 - GNOME Shell 48–50 para la extensión de la barra superior. La app funciona en cualquier escritorio.
 - Auriculares emparejados y conectados desde los ajustes de Bluetooth del sistema.
+- Opcional: `speech-dispatcher` (`spd-say`) para el saludo de voz diario.
 
 ## Instalación
 

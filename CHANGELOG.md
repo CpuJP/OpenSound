@@ -4,6 +4,22 @@ All notable changes to this project are documented in this file. The format foll
 
 ## [Unreleased]
 
+## [0.5.0] - 2026-10-22
+
+### Added
+
+- Equalizer presets (Off, Bright, Excited, Mellow, Relaxed, Vocal, Treble boost, Bass boost, Speech, Manual, Custom 1 and 2) in the app, and a "< preset >" selector in the GNOME Shell extension. Equalizer bands are drop-downs, so scrolling the page never changes them.
+- "Find your equalizer": a five-step blind listening test in the app that builds a custom equalizer.
+- Double and triple tap of the [NC/AMB] button: choose what the headset does (no function or Spotify). The headset handles taps itself and does not report them to the computer, so they cannot run commands on it.
+- Spoken greeting with the date and battery level the first time the headphones are worn each day (Spanish, through speech-dispatcher).
+- Low battery notifications (20 % and 10 %, the second one urgent), and an orange or red warning icon in the top bar.
+- The GNOME Shell extension is configurable from the app: top-bar icon, battery percentage, battery icon, and which sections the card and Quick Settings show.
+
+### Fixed
+
+- Equalizer band changes now show up in the app and the extension; the headset applies them without notifying, so the daemon reads them back.
+- The GNOME Shell extension no longer flips "focus on voice" and speak-to-chat on and off in a loop: on GNOME 50, updating a switch from the headset state was sent back as a new change.
+
 ## [0.4.0] - 2026-10-22
 
 ### Added

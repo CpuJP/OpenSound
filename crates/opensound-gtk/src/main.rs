@@ -11,9 +11,19 @@ use gtk::{gio, glib};
 use opensound_core::protocol::{self, NcMode, State};
 use serde_json::{json, Value};
 
+mod find_eq;
+
 const APP_ID: &str = "io.github.cpujp.OpenSound.App";
 const BUS_NAME: &str = "io.github.cpujp.OpenSound";
 const OBJ_PATH: &str = "/io/github/cpujp/OpenSound";
+/// Icons the top-bar indicator can use: (icon name, label).
+const PANEL_ICONS: [(&str, &str); 5] = [
+    ("audio-headphones-symbolic", "Auriculares"),
+    ("audio-headset-symbolic", "Auriculares con micrófono"),
+    ("audio-speakers-symbolic", "Altavoces"),
+    ("audio-x-generic-symbolic", "Nota musical"),
+    ("bluetooth-symbolic", "Bluetooth"),
+];
 const NC_MODES: [(&str, &str); 3] =
     [("nc", "Supresión de ruido"), ("ambient", "Sonido ambiente"), ("off", "Desactivado")];
 
@@ -29,9 +39,11 @@ struct Ui {
     nc_toggle: adw::ToggleGroup,
     amb_level: gtk::Scale,
     amb_voice: adw::SwitchRow,
-    eq: Vec<gtk::Scale>,
+    eq: Vec<adw::ComboRow>, // one drop-down per band, index 0..=20 for −10..+10
     switches: Vec<(adw::SwitchRow, &'static str)>,
     combos: Vec<(adw::ComboRow, &'static str, RefCell<Vec<u8>>)>,
+    panel_icon: adw::ComboRow,
+    last: RefCell<State>,
     fw: adw::ActionRow,
     voice: adw::SwitchRow,
     syncing: Cell<bool>, // true while widgets are updated from device state
@@ -103,10 +115,26 @@ impl Ui {
         self.amb_voice.set_sensitive(ambient);
     }
 
-    fn apply(self: &Rc<Self>, s: &State) {
+    fn apply_json(self: &Rc<Self>, json: &str) {
+        let raw: Value = serde_json::from_str(json).unwrap_or_default();
+        self.apply(&serde_json::from_value(raw.clone()).unwrap_or_default(), &raw);
+    }
+
+    fn apply(self: &Rc<Self>, s: &State, raw: &Value) {
+        self.last.replace(s.clone());
         self.syncing.set(true);
         for g in &self.groups {
             g.set_sensitive(s.connected);
+        }
+        // local settings are present even while disconnected
+        let state = raw;
+        if let Some(i) = PANEL_ICONS.iter().position(|(name, _)| state["panel_icon"].as_str() == Some(*name)) {
+            self.panel_icon.set_selected(i as u32);
+        }
+        for (row, key) in &self.switches {
+            if let Some(v) = state[*key].as_bool() {
+                row.set_active(v);
+            }
         }
         if !s.connected {
             self.status.set_title("Desconectado");
@@ -134,27 +162,28 @@ impl Ui {
             self.amb_level.set_value(level.into());
         }
         self.amb_voice.set_active(s.ambient_voice.unwrap_or(false));
-        for (scale, v) in self.eq.iter().zip(s.eq.iter().flatten()) {
-            scale.set_value((*v).into());
+        let custom = s.eq_preset.is_some_and(|p| protocol::CUSTOM_PRESETS.contains(&p));
+        for (row, v) in self.eq.iter().zip(s.eq.iter().flatten()) {
+            row.set_selected((i32::from(*v) + 10).clamp(0, 20) as u32);
         }
-        let state = serde_json::to_value(s).unwrap_or_default();
-        for (row, key) in &self.switches {
-            if let Some(v) = state[*key].as_bool() {
-                row.set_active(v);
-            }
+        for row in &self.eq {
+            row.set_sensitive(custom);
         }
         if let Some(lang) = &s.voice_language {
             self.voice.set_subtitle(&format!("Idioma: {lang}"));
         }
         for (row, key, values) in &self.combos {
-            if *key == "auto_power_off" {
-                if let Some(opts) = s.auto_power_off_options.as_ref().filter(|o| **o != *values.borrow()) {
+            // option lists the headset reports replace the built-in ones
+            let reported = match *key {
+                "auto_power_off" => s.auto_power_off_options.as_ref().map(|o| (o, protocol::AUTO_POWER_OFF)),
+                "eq_preset" => s.eq_presets.as_ref().map(|o| (o, protocol::EQ_PRESETS)),
+                _ => None,
+            };
+            if let Some((opts, table)) = reported {
+                if *opts != *values.borrow() {
                     let labels: Vec<String> = opts
                         .iter()
-                        .map(|o| {
-                            protocol::label(protocol::AUTO_POWER_OFF, *o)
-                                .map_or_else(|| format!("0x{o:02x}"), str::to_owned)
-                        })
+                        .map(|o| protocol::label(table, *o).map_or_else(|| format!("0x{o:02x}"), str::to_owned))
                         .collect();
                     *values.borrow_mut() = opts.clone();
                     row.set_model(Some(&gtk::StringList::new(&labels.iter().map(String::as_str).collect::<Vec<_>>())));
@@ -272,14 +301,27 @@ fn build_ui(app: &adw::Application) {
     groups.push(g);
 
     // Sound quality: band 0 is Clear Bass; show it after the bands
-    let g = group(&page, "Calidad de sonido / volumen", Some("Ecualizador (−10 a +10)"));
-    let mut eq: Vec<Option<gtk::Scale>> = vec![None; protocol::EQ_BANDS.len()];
+    let g = group(
+        &page,
+        "Calidad de sonido / volumen",
+        Some("Las bandas se pueden editar en Manual, Personalizado 1 y Personalizado 2 (−10 a +10)"),
+    );
+    let (eq_preset, eq_preset_values) = combo_row(&g, "Ecualizador", protocol::EQ_PRESETS);
+    let find_eq =
+        adw::ButtonRow::builder().title("Encontrar su ecualizador").start_icon_name("audio-speakers-symbolic").build();
+    g.add(&find_eq);
+    // drop-downs instead of sliders: scrolling the page must never change a band
+    let levels: Vec<String> = (-10..=10).map(|v: i32| if v > 0 { format!("+{v}") } else { v.to_string() }).collect();
+    let levels = gtk::StringList::new(&levels.iter().map(String::as_str).collect::<Vec<_>>());
+    let mut eq: Vec<Option<adw::ComboRow>> = vec![None; protocol::EQ_BANDS.len()];
     for i in [1, 2, 3, 4, 5, 0] {
         let band = protocol::EQ_BANDS[i];
         let title = if i == 0 { band.to_owned() } else { format!("{band} Hz") };
-        eq[i] = Some(scale_row(&g, &title, -10.0, 10.0));
+        let row = adw::ComboRow::builder().title(title).model(&levels).build();
+        g.add(&row);
+        eq[i] = Some(row);
     }
-    let eq: Vec<gtk::Scale> = eq.into_iter().flatten().collect();
+    let eq: Vec<adw::ComboRow> = eq.into_iter().flatten().collect();
     groups.push(g);
 
     // Connection
@@ -298,6 +340,16 @@ fn build_ui(app: &adw::Application) {
     g.add(&pause);
     groups.push(g);
 
+    // Button taps: the headset handles them itself and does not tell the computer
+    let g = group(
+        &page,
+        "Acción de botón rápido",
+        Some("Qué hacen los auriculares al tocar dos o tres veces el botón [NC/AMB]"),
+    );
+    let (tap2, tap2_values) = combo_row(&g, "Doble toque en los auriculares", protocol::BUTTON_FUNCTIONS);
+    let (tap3, tap3_values) = combo_row(&g, "Triple toque en los auriculares", protocol::BUTTON_FUNCTIONS);
+    groups.push(g);
+
     // Power
     let g = group(&page, "Energía / Batería", None);
     let (apo, apo_values) = combo_row(&g, "Apagado automático", protocol::AUTO_POWER_OFF);
@@ -307,12 +359,44 @@ fn build_ui(app: &adw::Application) {
     g.add(&power_off);
     groups.push(g);
 
+    // GNOME Shell extension: what the top bar and the card show (stored by the daemon)
+    let g = group(&page, "Widget de GNOME", Some("Elige qué se ve en la barra superior y en la tarjeta del widget"));
+    let icon_labels: Vec<&str> = PANEL_ICONS.iter().map(|(_, l)| *l).collect();
+    let panel_icon =
+        adw::ComboRow::builder().title("Icono en la barra superior").model(&gtk::StringList::new(&icon_labels)).build();
+    g.add(&panel_icon);
+    let mut widget_switches = Vec::new();
+    for (key, title) in [
+        ("panel_show_icon", "Mostrar el icono"),
+        ("panel_show_percent", "Mostrar el porcentaje de batería"),
+        ("panel_show_battery_icon", "Mostrar el icono de batería"),
+        ("widget_show_battery", "Tarjeta: batería"),
+        ("widget_show_noise", "Tarjeta: control de ruido"),
+        ("widget_show_speak_to_chat", "Tarjeta: hablar para chatear"),
+        ("widget_show_equalizer", "Tarjeta: ecualizador"),
+        ("widget_show_power", "Tarjeta: apagar auriculares"),
+        ("widget_quick_settings", "Botón en Ajustes rápidos"),
+    ] {
+        let row = adw::SwitchRow::builder().title(title).build();
+        g.add(&row);
+        widget_switches.push((row, key));
+    }
+    // not in `groups`: these settings live on this computer and work without headphones
+
     // System
     let g = group(&page, "Sistema", None);
     let fw = adw::ActionRow::builder().title("Versión").build();
     g.add(&fw);
     let voice = adw::SwitchRow::builder().title("Notificación y guía de voz").build();
     g.add(&voice);
+    let greeting = adw::SwitchRow::builder()
+        .title("Saludo de voz al empezar el día")
+        .subtitle("La primera vez que se conectan cada día dicen la fecha y la batería (en español)")
+        .build();
+    g.add(&greeting);
+    let greeting_test =
+        adw::ButtonRow::builder().title("Probar saludo").start_icon_name("audio-volume-high-symbolic").build();
+    g.add(&greeting_test);
     groups.push(g);
 
     let ui = Rc::new(Ui {
@@ -334,14 +418,23 @@ fn build_ui(app: &adw::Application) {
             (pause, "pause_on_removal"),
             (stc, "speak_to_chat"),
             (voice.clone(), "voice_guidance"),
-        ],
+            (greeting, "greeting"),
+        ]
+        .into_iter()
+        .chain(widget_switches)
+        .collect(),
         combos: vec![
             (conn_mode, "connection_mode", conn_values),
             (nc_button, "nc_amb_button", nc_values),
             (apo, "auto_power_off", apo_values),
             (stc_sens, "speak_to_chat_sensitivity", stc_sens_values),
             (stc_time, "speak_to_chat_timeout", stc_time_values),
+            (eq_preset, "eq_preset", eq_preset_values),
+            (tap2, "button_double", tap2_values),
+            (tap3, "button_triple", tap3_values),
         ],
+        last: RefCell::default(),
+        panel_icon: panel_icon.clone(),
         fw,
         voice,
         syncing: Cell::new(false),
@@ -361,10 +454,10 @@ fn build_ui(app: &adw::Application) {
     amb_level.connect_value_changed(move |_| u.set_later("ambient_level", |ui| json!(ui.amb_level.value() as i64)));
     let u = ui.clone();
     amb_voice.connect_active_notify(move |r| u.set("ambient_voice", json!(r.is_active())));
-    for scale in &eq {
+    for row in &eq {
         let u = ui.clone();
-        scale.connect_value_changed(move |_| {
-            u.set_later("eq", |ui| json!(ui.eq.iter().map(|s| s.value() as i64).collect::<Vec<_>>()))
+        row.connect_selected_notify(move |_| {
+            u.set("eq", json!(u.eq.iter().map(|r| i64::from(r.selected()) - 10).collect::<Vec<_>>()))
         });
     }
     let u = ui.clone();
@@ -381,6 +474,16 @@ fn build_ui(app: &adw::Application) {
         d.connect_response(Some("off"), move |_, _| ui.set("power_off", json!(true)));
         d.present(Some(&u.window));
     });
+    let u = ui.clone();
+    panel_icon.connect_selected_notify(move |r| {
+        if let Some((name, _)) = PANEL_ICONS.get(r.selected() as usize) {
+            u.set("panel_icon", json!(name));
+        }
+    });
+    let u = ui.clone();
+    greeting_test.connect_activated(move |_| u.set("greeting_test", json!(true)));
+    let u = ui.clone();
+    find_eq.connect_activated(move |_| find_eq::run(&u));
     for (row, key) in &ui.switches {
         let (u, key) = (ui.clone(), *key);
         row.connect_active_notify(move |r| u.set(key, json!(r.is_active())));
@@ -402,7 +505,7 @@ fn build_ui(app: &adw::Application) {
         let params = args.get(3).and_then(|v| v.get::<glib::Variant>().ok());
         if let (Some("StateChanged"), Some(params)) = (signal.as_deref(), params) {
             if let Some((json,)) = params.get::<(String,)>() {
-                u.apply(&serde_json::from_str(&json).unwrap_or_default());
+                u.apply_json(&json);
             }
         }
         None
@@ -410,10 +513,10 @@ fn build_ui(app: &adw::Application) {
     match proxy.call_sync("GetState", None, gio::DBusCallFlags::NONE, -1, None::<&gio::Cancellable>) {
         Ok(v) => {
             let json = v.get::<(String,)>().map(|(j,)| j).unwrap_or_default();
-            ui.apply(&serde_json::from_str(&json).unwrap_or_default());
+            ui.apply_json(&json);
         }
         Err(e) => {
-            ui.apply(&State::default());
+            ui.apply(&State::default(), &json!({}));
             ui.status.set_subtitle(&format!("Servicio no disponible: {}", e.message()));
         }
     }

@@ -46,6 +46,9 @@ The payload starts with a command byte, followed by a type byte that selects the
 | Speak-to-chat detail | `FA 0C` | `FB\|FD 0C sensitivity timeout` | `FC 0C sensitivity timeout` (sensitivity `00` auto, `01` high, `02` low; timeout `00` short ≈5 s, `01` standard ≈15 s, `02` long ≈30 s, `03` never) |
 | Automatic power off | `26 05` (options: `20 05`) | `27\|29 05 active timer` | `28 05 active 00` (`10` when taken off, `11` never) |
 | Voice guidance (table 2) | `46 01` | `47\|49 01 v language` | `48 01 v` |
+| Wearing (notification) | — | `A5 01 00 v 00` (`01` put on, `02` taken off) | — |
+| Equalizer presets | `50 00` | `51 00 bands levels count (id namelen name…)` | `58 00 preset 00` (`00` off, `10`–`17` presets, `A0` manual, `A1`–`A2` custom). Band writes are not notified; read them back with `56 00`. |
+| [NC/AMB] double / triple tap | `F6 0D` (capability: `F0 0D`) | `F7\|F9 0D 02 double triple` | `F8 0D 02 double triple` (`00` no function, `01` Spotify) |
 | Power off | — | — (the link drops) | `24 03 01` (type `03` power off, `01` user request) |
 
 Boolean values `v` use **`00` = on, `01` = off**.

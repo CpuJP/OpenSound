@@ -51,6 +51,7 @@
   -barlevel-background-color: rgba(127, 127, 127, 0.25);
   -barlevel-active-background-color: -st-accent-color;
   -barlevel-overdrive-separator-width: 0;
+  -barlevel-overdrive-color: transparent;
 }
 
 .opensound-bar.low {
@@ -133,4 +134,39 @@
 .opensound-chip:checked {
   background-color: -st-accent-color;
   color: -st-accent-fg-color;
+}
+
+.opensound-eq-name {
+  font-weight: bold;
+  padding: 6px 14px;
+  border-radius: 999px;
+  color: rgba(127, 127, 127, 1);
+}
+
+.opensound-eq-name.active {
+  background-color: -st-accent-color;
+  color: -st-accent-fg-color;
+}
+
+.opensound-warning {
+  color: #ff7800;
+}
+
+.opensound-warning.critical {
+  color: #e01b24;
+}
+
+.opensound-eq-row {
+  spacing: 8px;
+}
+
+.opensound-arrow {
+  padding: 6px;
+  border-radius: 999px;
+  background-color: rgba(127, 127, 127, 0.15);
+}
+
+.opensound-arrow:hover,
+.opensound-arrow:focus {
+  background-color: rgba(127, 127, 127, 0.28);
 }

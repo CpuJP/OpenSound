@@ -34,6 +34,11 @@
     <display_length compare="ge">360</display_length>
   </requires>
   <releases>
+    <release version="0.5.0" date="2026-10-22">
+      <description>
+        <p>Equalizer presets and a guided "find your equalizer" test, double and triple tap functions, a spoken greeting each day, low battery notifications, and a configurable GNOME Shell extension.</p>
+      </description>
+    </release>
     <release version="0.4.0" date="2026-10-22">
       <description>
         <p>Speak-to-chat: turn it on or off and set the voice detection sensitivity and the time until the mode ends.</p>
