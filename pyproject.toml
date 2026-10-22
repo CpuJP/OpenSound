@@ -1,7 +1,7 @@
 [project]
 name = "opensound"
 version = "0.1.0"
-description = "Unofficial Linux controller for WH-1000XM5 headphones (not affiliated with Sony)"
+description = "Non-profit, unofficial Linux controller for WH-1000XM5 headphones (not affiliated with Sony)"
 readme = "README.md"
 license = "GPL-3.0-or-later"
 license-files = ["LICENSE"]

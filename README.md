@@ -5,7 +5,7 @@
 
 **OpenSound** is a free and open-source Linux application to control and configure wireless headphones that speak the MDR v2 protocol, such as the WH-1000XM5. It provides a GTK 4 / libadwaita app and a GNOME Shell extension, with no account, no telemetry and no cloud.
 
-> **OpenSound is an independent community project. It is not affiliated with, endorsed, sponsored or approved by Sony Group Corporation or any of its subsidiaries.** See [Legal notice](#legal-notice).
+> **OpenSound is a non-profit, non-commercial community project.** There is no official way to configure these headphones from Linux, so OpenSound exists only to extend their connectivity and let owners use the hardware they already have on their computer. It is not sold, has no paid features, and is **not affiliated with, endorsed, sponsored or approved by Sony Group Corporation** or any of its subsidiaries. See [Legal notice](#legal-notice).
 
 [Leer en español](README.es.md)
 
@@ -76,14 +76,14 @@ python3 -m opensound.daemon                  # run the daemon in the foreground
 python3 -m opensound                         # run the app from the source tree
 ```
 
-See [CONTRIBUTING.md](CONTRIBUTING.md). Do **not** commit APKs, decompiled vendor code or any other third-party proprietary material. The [`.gitignore`](.gitignore) already excludes them.
+See [CONTRIBUTING.md](CONTRIBUTING.md). Do **not** commit third-party proprietary software, firmware or code derived from it. The [`.gitignore`](.gitignore) already excludes them.
 
 ## Known limitations
 
 - The UI is currently in Spanish only. Translations are welcome.
 - Changing the voice guidance language is not supported, because it requires a firmware package download.
 - Firmware updates are not supported and will not be added.
-- Turning off the touch panel makes the headphones unassign the voice assistant. You must assign it again from the official app.
+- Turning off the touch panel makes the headphones unassign the voice assistant. OpenSound cannot assign it again.
 
 ## AI transparency
 
@@ -91,9 +91,9 @@ OpenSound was developed with the assistance of an AI coding agent (Claude Code),
 
 ## Legal notice
 
-- OpenSound is an **unofficial**, independent, community-developed project. It is **not** affiliated with, authorized, maintained, sponsored or endorsed by Sony Group Corporation, Sony Corporation, Sony Electronics Inc. or any of their affiliates.
-- "Sony", "WH-1000XM5", "Sound Connect", "LDAC", "DSEE" and all related names, marks and logos are trademarks or registered trademarks of their respective owners. They are used here only to identify the compatible hardware (nominative use) and do not imply any association.
-- This repository contains **no** proprietary code, binaries, firmware, images or other assets from Sony or any other vendor. The protocol knowledge was obtained for the sole purpose of interoperability between hardware lawfully owned by the author and the Linux operating system.
+- OpenSound is an **unofficial**, independent, **non-profit** community project with no commercial purpose. It is **not** affiliated with, authorized, maintained, sponsored or endorsed by Sony Group Corporation, Sony Corporation, Sony Electronics Inc. or any of their affiliates.
+- "Sony", "WH-1000XM5", "LDAC", "DSEE" and all related names, marks and logos are trademarks or registered trademarks of their respective owners. They are used here only to identify the compatible hardware (nominative use) and do not imply any association.
+- This repository contains **no** proprietary code, binaries, firmware, images or other assets from Sony or any other vendor. The protocol knowledge was obtained for the sole purpose of interoperability between hardware lawfully owned by the author and the Linux operating system, for which no official software exists.
 - The software is provided **"as is", without warranty of any kind**. See sections 15–17 of the [license](LICENSE). Use at your own risk. The authors are not liable for any damage to devices, loss of data, warranty issues or any other consequence of using this software.
 
 See [DISCLAIMER.md](DISCLAIMER.md) for the full text.

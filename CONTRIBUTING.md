@@ -4,7 +4,7 @@ Thanks for your interest in improving OpenSound. Bug reports, device reports, tr
 
 ## Ground rules
 
-- **Never commit proprietary material.** Do not add vendor APKs, decompiled vendor code, firmware or vendor assets, not even in an issue or pull request. Describe protocol findings in your own words, as byte layouts, in [docs/PROTOCOL.md](docs/PROTOCOL.md).
+- **Never commit proprietary material.** Do not add third-party proprietary software, code derived from it, firmware or third-party assets, not even in an issue or pull request. Describe protocol findings in your own words, as byte layouts, in [docs/PROTOCOL.md](docs/PROTOCOL.md).
 - Be respectful. This project follows the [Code of Conduct](CODE_OF_CONDUCT.md).
 - By contributing, you agree that your contribution is licensed under the GPL-3.0-or-later.
 

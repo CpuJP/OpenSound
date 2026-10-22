@@ -4,7 +4,7 @@ labels: [bug]
 body:
   - type: markdown
     attributes:
-      value: Please do not attach APKs, decompiled vendor code or other proprietary files.
+      value: Please do not attach third-party proprietary software or files.
   - type: textarea
     id: what
     attributes:

@@ -2,7 +2,7 @@
 
 **OpenSound** es una aplicación libre y de código abierto para Linux. Permite controlar y configurar auriculares inalámbricos que usan el protocolo MDR v2, como los WH-1000XM5. Incluye una app GTK 4 / libadwaita y una extensión de GNOME Shell. No requiere cuentas, no tiene telemetría y no usa la nube.
 
-> **OpenSound es un proyecto comunitario independiente. No está afiliado, respaldado, patrocinado ni aprobado por Sony Group Corporation ni por ninguna de sus filiales.** Consulta el [aviso legal](#aviso-legal).
+> **OpenSound es un proyecto comunitario sin fines de lucro ni comerciales.** No existe una opción oficial para configurar estos auriculares desde Linux, así que OpenSound existe solo para ampliar su conectividad y permitir que sus dueños usen en su computador el hardware que ya tienen. No se vende, no tiene funciones de pago y **no está afiliado, respaldado, patrocinado ni aprobado por Sony Group Corporation** ni por ninguna de sus filiales. Consulta el [aviso legal](#aviso-legal).
 
 [Read in English](README.md)
 
@@ -60,7 +60,7 @@ Los auriculares aceptan una sola conexión de control. El daemon es el único pr
 - Por ahora, la interfaz solo está en español.
 - No permite cambiar el idioma de la guía de voz, porque requiere descargar un paquete de firmware.
 - No hay actualización de firmware.
-- Al desactivar el panel táctil, los auriculares quitan el asistente de voz asignado. Para recuperarlo hay que elegirlo de nuevo en la app oficial.
+- Al desactivar el panel táctil, los auriculares quitan el asistente de voz asignado. OpenSound no puede volver a asignarlo.
 
 ## Transparencia sobre IA
 
@@ -68,9 +68,9 @@ OpenSound se desarrolló con ayuda de un agente de programación con IA (Claude 
 
 ## Aviso legal
 
-- OpenSound es un proyecto **no oficial**, independiente y desarrollado por la comunidad. **No** está afiliado, autorizado, mantenido, patrocinado ni respaldado por Sony Group Corporation, Sony Corporation, Sony Electronics Inc. ni ninguna de sus filiales.
-- "Sony", "WH-1000XM5", "Sound Connect", "LDAC", "DSEE" y los nombres, marcas y logotipos relacionados son marcas comerciales o registradas de sus respectivos titulares. Aquí se usan solo para identificar el hardware compatible (uso nominativo) y no implican ninguna asociación.
-- Este repositorio **no** contiene código, binarios, firmware, imágenes ni otros recursos propietarios de Sony ni de ningún otro fabricante. El conocimiento del protocolo se obtuvo con el único fin de lograr la interoperabilidad entre hardware adquirido legalmente por el autor y el sistema operativo Linux.
+- OpenSound es un proyecto **no oficial**, independiente, comunitario y **sin fines de lucro** ni propósito comercial. **No** está afiliado, autorizado, mantenido, patrocinado ni respaldado por Sony Group Corporation, Sony Corporation, Sony Electronics Inc. ni ninguna de sus filiales.
+- "Sony", "WH-1000XM5", "LDAC", "DSEE" y los nombres, marcas y logotipos relacionados son marcas comerciales o registradas de sus respectivos titulares. Aquí se usan solo para identificar el hardware compatible (uso nominativo) y no implican ninguna asociación.
+- Este repositorio **no** contiene código, binarios, firmware, imágenes ni otros recursos propietarios de Sony ni de ningún otro fabricante. El conocimiento del protocolo se obtuvo con el único fin de lograr la interoperabilidad entre hardware adquirido legalmente por el autor y el sistema operativo Linux, para el que no existe software oficial.
 - El software se ofrece **"tal cual", sin garantía de ningún tipo** (secciones 15–17 de la [licencia](LICENSE)). Su uso es bajo tu propia responsabilidad. Los autores no responden por daños en dispositivos, pérdida de datos, problemas de garantía ni cualquier otra consecuencia de su uso.
 
 El texto completo está en [DISCLAIMER.md](DISCLAIMER.md).

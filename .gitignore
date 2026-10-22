@@ -1,5 +1,5 @@
-# Proprietary third-party material: never commit APKs or their extracted contents
-songpal_extracted/
+# Third-party proprietary material must never be committed
+*_extracted/
 *.apk
 *.apkm
 *.xapk

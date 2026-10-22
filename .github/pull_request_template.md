@@ -9,5 +9,5 @@
 
 ## Checklist
 
-- [ ] No APKs, decompiled vendor code or other proprietary material are included
+- [ ] No third-party proprietary material is included
 - [ ] Protocol changes are documented in `docs/PROTOCOL.md`

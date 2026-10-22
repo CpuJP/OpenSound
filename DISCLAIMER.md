@@ -4,19 +4,23 @@
 
 OpenSound is an unofficial, independent, community-developed open-source project. It is **not** affiliated with, associated with, authorized by, endorsed by, sponsored by or in any way officially connected with Sony Group Corporation, Sony Corporation, Sony Electronics Inc. or any of their subsidiaries or affiliates.
 
+## Non-profit purpose
+
+OpenSound is a non-profit, non-commercial project. It is not sold, has no paid features, and does not generate revenue. It exists because there is no official way to configure these headphones from Linux. Its only goal is to extend the connectivity of hardware that its users already own.
+
 ## Trademarks
 
-"Sony", "WH-1000XM5", "Sound Connect", "Headphones Connect", "LDAC", "DSEE", "Clear Bass" and all related names, marks, emblems and images are trademarks or registered trademarks of their respective owners. They are mentioned only to describe which hardware this software is compatible with. Their use does not imply any affiliation with or endorsement by the trademark holders.
+"Sony", "WH-1000XM5", "LDAC", "DSEE", "Clear Bass" and all related names, marks, emblems and images are trademarks or registered trademarks of their respective owners. They are mentioned only to describe which hardware this software is compatible with. Their use does not imply any affiliation with or endorsement by the trademark holders.
 
-OpenSound does not use any vendor logo or brand identity, and does not present itself as an official product.
+OpenSound does not use any manufacturer logo or brand identity, and does not present itself as an official product.
 
 ## No proprietary material
 
 This repository does not contain, and must never contain:
 
-- vendor applications, APK files or any part of them;
-- decompiled or disassembled vendor source code;
-- firmware, images, sounds, translations or other copyrighted vendor assets.
+- third-party proprietary software or any part of it;
+- code derived from third-party proprietary software;
+- firmware, images, sounds, translations or other copyrighted third-party assets.
 
 The protocol documentation in this repository describes how to exchange data with hardware lawfully owned by the author. It was written for the sole purpose of achieving interoperability between that hardware and the Linux operating system, for which no official software exists.
 

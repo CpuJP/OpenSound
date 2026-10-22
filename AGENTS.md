@@ -4,7 +4,7 @@ Guidance for AI coding agents (Claude Code, Codex, Copilot, Cursor, Gemini, …)
 
 ## Project overview
 
-OpenSound is an unofficial, GPL-3.0-or-later Linux controller for WH-1000XM5 headphones. It speaks the vendor's MDR v2 control protocol over Bluetooth Classic RFCOMM.
+OpenSound is an unofficial, GPL-3.0-or-later Linux controller for WH-1000XM5 headphones. It is a non-profit project that extends the headphones' connectivity to Linux, where no official option exists. It speaks the MDR v2 control protocol over Bluetooth Classic RFCOMM.
 
 - `opensound/transport.py`: SDP channel lookup, RFCOMM socket, frame codec (escaping, checksum), ACK and sequence handling. No protocol semantics.
 - `opensound/protocol.py`: pure functions with no I/O. `parse(data_type, payload, state)` updates a state dict from a device message. `build(key, value, state)` returns the `(data_type, payload)` that changes a setting. `INIT_QUERIES` lists what is read after connecting.
@@ -57,13 +57,13 @@ Only one daemon can own the link. Stop the installed one (`systemctl --user stop
 ## Testing on real hardware
 
 - Read before you write. Record the current value, apply the change, verify the notification, and **restore the original value**.
-- Some writes restart the headset's Bluetooth. Turning the touch panel off also makes the device unassign the voice assistant, which only the official phone app can assign again. Ask the human before testing that write.
+- Some writes restart the headset's Bluetooth. Turning the touch panel off also makes the device unassign the voice assistant, and OpenSound cannot assign it again. Ask the human before testing that write.
 - Never send firmware-update (`UPDT_*`) or factory-reset commands.
 
 ## Legal and safety boundaries (strict)
 
-- **Never commit vendor material.** That covers APKs, extracted APK contents (`songpal_extracted/` is git-ignored), decompiled source, firmware and vendor images, sounds or strings. Describe protocol findings in your own words as byte layouts.
-- Do not add vendor logos or branding. Do not present the project as official. Keep the disclaimer in `README.md` and `DISCLAIMER.md` intact.
+- **Never commit third-party proprietary material.** That covers proprietary software or any part of it, code derived from it, firmware, and third-party images, sounds or strings. Folders matching `*_extracted/` are git-ignored for local research material. Describe protocol findings in your own words as byte layouts.
+- Do not add manufacturer logos or branding. Do not present the project as official. Keep the disclaimer in `README.md` and `DISCLAIMER.md` intact.
 - Do not commit personal data such as Bluetooth addresses, device names or user names in tests, docs or screenshots.
 
 ## Commits and pull requests

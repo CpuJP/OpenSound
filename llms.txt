@@ -1,6 +1,6 @@
 # OpenSound
 
-> Unofficial, GPL-3.0-or-later Linux controller for WH-1000XM5 headphones. A Python daemon speaks the MDR v2 protocol over Bluetooth RFCOMM and exposes a session D-Bus API, used by a GTK 4 / libadwaita app and a GNOME Shell extension. Not affiliated with Sony.
+> Unofficial, GPL-3.0-or-later Linux controller for WH-1000XM5 headphones. A Python daemon speaks the MDR v2 protocol over Bluetooth RFCOMM and exposes a session D-Bus API, used by a GTK 4 / libadwaita app and a GNOME Shell extension. Non-profit; built because no official Linux option exists. Not affiliated with Sony.
 
 ## Docs
 
