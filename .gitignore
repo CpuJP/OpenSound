@@ -1,11 +1,3 @@
-# Third-party proprietary material must never be committed
-*_extracted/
-*.apk
-*.apkm
-*.xapk
-*.apks
-*.dex
-
 # Editors / OS
 .idea/
 .vscode/

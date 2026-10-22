@@ -71,7 +71,7 @@ Only one daemon can own the link. Stop the installed one (`systemctl --user stop
 
 ## Legal and safety boundaries (strict)
 
-- **Never commit third-party proprietary material.** That covers proprietary software or any part of it, code derived from it, firmware, and third-party images, sounds or strings. Folders matching `*_extracted/` are git-ignored for local research material. Describe protocol findings in your own words as byte layouts.
+- **Never commit third-party proprietary material.** That covers proprietary software or any part of it, code derived from it, firmware, and third-party images, sounds or strings. Describe protocol findings in your own words as byte layouts.
 - Do not add manufacturer logos or branding. Do not present the project as official. Keep the disclaimer in `README.md` and `DISCLAIMER.md` intact.
 - Do not commit personal data such as Bluetooth addresses, device names or user names in tests, docs or screenshots.
 

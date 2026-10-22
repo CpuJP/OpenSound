@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: GPL-3.0-or-later
-// OpenSound: top-bar battery indicator + quick settings toggle for Sony headphones.
+// OpenSound: top-bar battery indicator + quick settings toggle for WH-1000XM5 headphones.
 // All headset I/O goes through the io.github.cpujp.OpenSound D-Bus service (opensound-daemon).
 import Clutter from 'gi://Clutter';
 import Gio from 'gi://Gio';
