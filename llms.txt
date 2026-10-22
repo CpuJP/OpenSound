@@ -1,0 +1,24 @@
+# OpenSound
+
+> Unofficial, GPL-3.0-or-later Linux controller for WH-1000XM5 headphones. A Python daemon speaks the MDR v2 protocol over Bluetooth RFCOMM and exposes a session D-Bus API, used by a GTK 4 / libadwaita app and a GNOME Shell extension. Not affiliated with Sony.
+
+## Docs
+
+- [README](README.md): features, install, D-Bus API, legal notice
+- [AGENTS.md](AGENTS.md): architecture, commands, code style, protocol and safety rules for AI agents
+- [Protocol reference](docs/PROTOCOL.md): framing, commands, confirmation alerts
+- [Contributing](CONTRIBUTING.md): workflow, device reports, AI-assisted contributions
+- [Disclaimer](DISCLAIMER.md): no affiliation, trademarks, no warranty
+
+## Source
+
+- [opensound/transport.py](opensound/transport.py): RFCOMM link and frame codec
+- [opensound/protocol.py](opensound/protocol.py): pure request builders and reply parsers
+- [opensound/daemon.py](opensound/daemon.py): D-Bus service
+- [opensound/app.py](opensound/app.py): GTK app
+- [gnome-extension/opensound@cpujp.github.io/extension.js](gnome-extension/opensound@cpujp.github.io/extension.js): GNOME Shell extension
+
+## Optional
+
+- [Changelog](CHANGELOG.md)
+- [Security policy](SECURITY.md)
