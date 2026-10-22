@@ -1,0 +1,4 @@
+[D-BUS Service]
+Name=io.github.cpujp.OpenSound
+Exec=/usr/bin/opensound-daemon
+SystemdService=opensound.service

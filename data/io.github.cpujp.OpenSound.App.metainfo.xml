@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- SPDX-License-Identifier: GPL-3.0-or-later -->
+<component type="desktop-application">
+  <id>io.github.cpujp.OpenSound.App</id>
+  <name>OpenSound</name>
+  <summary>Control and configure WH-1000XM5 headphones</summary>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>GPL-3.0-or-later</project_license>
+  <developer id="io.github.cpujp">
+    <name>Juan Pablo Giraldo Collazos</name>
+  </developer>
+  <description>
+    <p>
+      OpenSound is a non-profit, community-made application for Linux. It lets you control
+      noise cancelling, the equalizer, multipoint, automatic power off and other settings of
+      WH-1000XM5 headphones, and shows the battery level and the active codec.
+    </p>
+    <p>
+      It exists because there is no official way to configure these headphones from Linux.
+      OpenSound is not affiliated with or endorsed by Sony.
+    </p>
+  </description>
+  <launchable type="desktop-id">io.github.cpujp.OpenSound.App.desktop</launchable>
+  <url type="homepage">https://github.com/CpuJP/OpenSound</url>
+  <url type="bugtracker">https://github.com/CpuJP/OpenSound/issues</url>
+  <url type="vcs-browser">https://github.com/CpuJP/OpenSound</url>
+  <content_rating type="oars-1.1"/>
+  <supports>
+    <control>pointing</control>
+    <control>keyboard</control>
+    <control>touch</control>
+  </supports>
+  <requires>
+    <display_length compare="ge">360</display_length>
+  </requires>
+  <releases>
+    <release version="0.2.0" date="2026-10-22">
+      <description>
+        <p>Rewrite in Rust, confirmation dialogs for disruptive changes, Fedora RPM packages.</p>
+      </description>
+    </release>
+    <release version="0.1.0" date="2026-10-21"/>
+  </releases>
+</component>
