@@ -308,6 +308,9 @@ pub fn build(key: &str, value: &Value, state: &State) -> Result<(u8, Vec<u8>), S
             (DT_MDR, vec![0x98, 0x00, alert.id, yes as u8])
         }
         "voice_guidance" => (DT_MDR2, vec![0x48, 0x01, flag(as_bool(value)?)]),
+        // power status: type 03 (power off), 01 = user power off; only `true` is meaningful
+        "power_off" if as_bool(value)? => (DT_MDR, vec![0x24, 0x03, 0x01]),
+        "power_off" => return Err("power_off only accepts true".to_owned()),
         _ => return Err(format!("unknown setting {key:?}")),
     };
     Ok(frame)
@@ -542,6 +545,7 @@ mod tests {
         assert_eq!(build("connection_mode", &json!(1), &st).unwrap().1, hex("e8 00 01"));
         assert_eq!(build("nc_amb_button", &json!(4), &st).unwrap().1, hex("68 30 04"));
         assert_eq!(build("voice_guidance", &json!(false), &st).unwrap(), (DT_MDR2, hex("48 01 01")));
+        assert_eq!(build("power_off", &json!(true), &st).unwrap(), (DT_MDR, hex("24 03 01")));
     }
 
     #[test]
@@ -549,6 +553,8 @@ mod tests {
         let st = State::default();
         assert!(build("nope", &json!(1), &st).is_err());
         assert!(build("multipoint", &json!(1), &st).is_err());
+        assert!(build("power_off", &json!(false), &st).is_err());
+        assert!(build("power_off", &json!(1), &st).is_err());
         assert!(build("auto_power_off", &json!(0x12), &st).is_err());
         assert!(build("connection_mode", &json!(2), &st).is_err());
         assert!(build("nc_amb_button", &json!(0), &st).is_err());

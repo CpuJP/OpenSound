@@ -44,6 +44,7 @@ The payload starts with a command byte, followed by a type byte that selects the
 | Pause when taken off | `F6 01` | `F7\|F9 01 v` | `F8 01 v` |
 | Automatic power off | `26 05` (options: `20 05`) | `27\|29 05 active timer` | `28 05 active 00` (`10` when taken off, `11` never) |
 | Voice guidance (table 2) | `46 01` | `47\|49 01 v language` | `48 01 v` |
+| Power off | — | — (the link drops) | `24 03 01` (type `03` power off, `01` user request) |
 
 Boolean values `v` use **`00` = on, `01` = off**.
 

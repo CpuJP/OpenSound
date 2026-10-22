@@ -15,7 +15,7 @@
 | Sonido | Ecualizador de 5 bandas (400, 1k, 2.5k, 6.3k y 16k Hz) de −10 a +10, y Clear Bass |
 | Conexión | Conectar a 2 dispositivos a la vez (multipunto), calidad de conexión Bluetooth |
 | Controles | Ajustes de operación [NC/AMB], panel de control con sensor táctil, pausa al quitarse los auriculares |
-| Energía | Apagado automático |
+| Energía | Apagado automático, apagar desde la app o la extensión |
 | Sistema | Versión de firmware, guía de voz (activar o desactivar; el idioma se muestra) |
 
 Los cambios hechos en los auriculares, por ejemplo con los botones, se ven al instante en la interfaz. Algunos cambios reinician la conexión, como el del multipunto. Para ellos, los auriculares piden una confirmación y OpenSound la muestra como diálogo.

@@ -4,6 +4,12 @@ All notable changes to this project are documented in this file. The format foll
 
 ## [Unreleased]
 
+## [0.3.2] - 2026-10-22
+
+### Added
+
+- Power off the headphones from the app (with a confirmation dialog) or from the GNOME Shell extension (click twice).
+
 ## [0.3.1] - 2026-10-22
 
 ### Changed

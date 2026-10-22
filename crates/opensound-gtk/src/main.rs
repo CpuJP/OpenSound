@@ -290,6 +290,10 @@ fn build_ui(app: &adw::Application) {
     // Power
     let g = group(&page, "Energía / Batería", None);
     let (apo, apo_values) = combo_row(&g, "Apagado automático", protocol::AUTO_POWER_OFF);
+    let power_off =
+        adw::ButtonRow::builder().title("Apagar auriculares").start_icon_name("system-shutdown-symbolic").build();
+    power_off.add_css_class("destructive-action");
+    g.add(&power_off);
     groups.push(g);
 
     // System
@@ -349,6 +353,20 @@ fn build_ui(app: &adw::Application) {
             u.set_later("eq", |ui| json!(ui.eq.iter().map(|s| s.value() as i64).collect::<Vec<_>>()))
         });
     }
+    let u = ui.clone();
+    power_off.connect_activated(move |_| {
+        let d = adw::AlertDialog::new(
+            Some("¿Apagar los auriculares?"),
+            Some("Para volver a usarlos tendrás que encenderlos con su botón."),
+        );
+        d.add_response("cancel", "Cancelar");
+        d.add_response("off", "Apagar");
+        d.set_response_appearance("off", adw::ResponseAppearance::Destructive);
+        d.set_close_response("cancel");
+        let ui = u.clone();
+        d.connect_response(Some("off"), move |_, _| ui.set("power_off", json!(true)));
+        d.present(Some(&u.window));
+    });
     for (row, key) in &ui.switches {
         let (u, key) = (ui.clone(), *key);
         row.connect_active_notify(move |r| u.set(key, json!(r.is_active())));

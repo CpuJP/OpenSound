@@ -90,3 +90,23 @@
   text-align: right;
   font-feature-settings: "tnum";
 }
+
+.opensound-power {
+  padding: 8px 12px;
+  border-radius: 12px;
+  color: #e01b24;
+}
+
+.opensound-power:hover,
+.opensound-power:focus {
+  background-color: rgba(224, 27, 36, 0.12);
+}
+
+.opensound-power:checked {
+  background-color: #e01b24;
+  color: #ffffff;
+}
+
+.opensound-power-box {
+  spacing: 8px;
+}

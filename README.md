@@ -18,7 +18,7 @@
 | Sound | 5-band equalizer (400, 1k, 2.5k, 6.3k, 16k Hz) from −10 to +10, plus Clear Bass |
 | Connection | Connect to 2 devices simultaneously (multipoint), Bluetooth connection quality |
 | Controls | [NC/AMB] button behaviour, touch sensor control panel, pause when headphones are taken off |
-| Power | Automatic power off |
+| Power | Automatic power off, power off from the app or the extension |
 | System | Firmware version, voice guidance on/off (language is shown) |
 
 Changes made on the headphones themselves, for example with the buttons, appear in the UI immediately. When the headphones ask for a confirmation before a disruptive change, such as a reconnect after toggling multipoint, OpenSound shows the same confirmation dialog.

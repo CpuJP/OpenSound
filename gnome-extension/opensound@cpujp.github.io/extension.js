@@ -132,6 +132,51 @@ class PanelButton extends PanelMenu.Button {
 
         this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
         this.menu.addAction('Abrir OpenSound', () => ext.openApp(), 'emblem-system-symbolic');
+
+        // Power off asks for a second click instead of a dialog, so the menu stays open.
+        const powerItem = staticItem();
+        const powerBox = new St.BoxLayout({style_class: 'opensound-power-box'});
+        powerBox.add_child(new St.Icon({icon_name: 'system-shutdown-symbolic', style_class: 'popup-menu-icon'}));
+        this._powerLabel = new St.Label({y_align: Clutter.ActorAlign.CENTER});
+        powerBox.add_child(this._powerLabel);
+        this._power = new St.Button({child: powerBox, style_class: 'opensound-power', x_expand: true, can_focus: true});
+        this._power.connect('clicked', () => {
+            if (this._armed) {
+                this._disarm();
+                ext.set('power_off', true);
+                this.menu.close();
+            } else {
+                this._arm();
+            }
+        });
+        powerItem.add_child(this._power);
+        this.menu.addMenuItem(powerItem);
+        this.menu.connect('open-state-changed', (_m, open) => !open && this._disarm());
+        this.connect('destroy', () => {
+            if (this._armTimeout)
+                GLib.source_remove(this._armTimeout);
+        });
+        this._disarm();
+    }
+
+    _arm() {
+        this._armed = true;
+        this._power.checked = true;
+        this._powerLabel.text = 'Pulsa otra vez para apagar';
+        this._armTimeout = GLib.timeout_add_seconds(GLib.PRIORITY_DEFAULT, 4, () => {
+            this._armTimeout = 0;
+            this._disarm();
+            return GLib.SOURCE_REMOVE;
+        });
+    }
+
+    _disarm() {
+        if (this._armTimeout)
+            GLib.source_remove(this._armTimeout);
+        this._armTimeout = 0;
+        this._armed = false;
+        this._power.checked = false;
+        this._powerLabel.text = 'Apagar auriculares';
     }
 
     update(s) {
