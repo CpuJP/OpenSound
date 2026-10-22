@@ -135,13 +135,12 @@ export default class OpenSoundExtension extends Extension {
     }
 
     _refresh() {
-        if (!this._proxy?.g_name_owner) {
-            this._indicator?.update({connected: false});
-            return;
-        }
-        this._proxy.GetStateRemote(([json], error) => {
-            if (!error)
-                this._update(json);
+        // Calling even without an owner lets D-Bus activation start the daemon.
+        this._proxy?.GetStateRemote((result, error) => {
+            if (error)
+                this._indicator?.update({connected: false});
+            else
+                this._update(result[0]);
         });
     }
 
@@ -161,7 +160,7 @@ export default class OpenSoundExtension extends Extension {
     }
 
     openApp() {
-        const app = Gio.DesktopAppInfo.new('io.github.cpujp.OpenSound.desktop');
+        const app = Gio.DesktopAppInfo.new('io.github.cpujp.OpenSound.App.desktop');
         if (app)
             app.launch([], null);
         else

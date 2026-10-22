@@ -9,22 +9,42 @@ permissions:
   contents: read
 
 jobs:
-  test:
+  core:
+    name: Format and protocol/daemon tests
     runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        python-version: ["3.10", "3.12", "3.13"]
     steps:
       - uses: actions/checkout@v4
-      - uses: actions/setup-python@v5
+      - uses: dtolnay/rust-toolchain@stable
         with:
-          python-version: ${{ matrix.python-version }}
-      - name: Unit tests
-        run: python -m unittest discover -s tests -t . -v
-      - name: Byte-compile sources
-        run: python -m compileall -q opensound
+          components: rustfmt
+      - name: Check formatting
+        run: cargo fmt --all --check
+      - name: Unit and integration tests (no GTK needed)
+        run: cargo test --locked -p opensound-core -p opensound-daemon
+
+  fedora:
+    name: Full build, clippy and RPM on Fedora
+    runs-on: ubuntu-latest
+    container: fedora:latest
+    steps:
+      - name: Install build dependencies
+        run: dnf install -y git cargo rust clippy gtk4-devel libadwaita-devel rpm-build systemd-rpm-macros desktop-file-utils appstream
+      - uses: actions/checkout@v4
+      - name: Trust the workspace
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+      - name: Clippy
+        run: cargo clippy --all-targets --locked -- -D warnings
+      - name: Tests
+        run: cargo test --locked
+      - name: Build RPM
+        run: sh packaging/build-rpm.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rpm
+          path: dist/*.rpm
 
   extension:
+    name: GNOME Shell extension
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

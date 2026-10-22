@@ -4,7 +4,7 @@
 
 ## Testing
 
-- [ ] `python3 -m unittest discover -s tests -t .` passes
+- [ ] `cargo fmt --all --check`, `cargo clippy --all-targets -- -D warnings` and `cargo test` pass
 - [ ] Tested on real hardware (model / firmware): 
 
 ## Checklist

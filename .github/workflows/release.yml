@@ -1,0 +1,93 @@
+# Publishes a GitHub release when the version in Cargo.toml changes on main
+# and no tag exists for it yet. Can also be started by hand.
+name: Release
+
+on:
+  push:
+    branches: [main]
+    paths: [Cargo.toml]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.v.outputs.version }}
+      release: ${{ steps.v.outputs.release }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: v
+        run: |
+          V=$(sed -n 's/^version = "\(.*\)"/\1/p' Cargo.toml | head -n1)
+          echo "version=$V" >> "$GITHUB_OUTPUT"
+          if git ls-remote --exit-code --tags origin "refs/tags/v$V" >/dev/null; then
+            echo "release=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "release=true" >> "$GITHUB_OUTPUT"
+          fi
+
+  rpm:
+    needs: check
+    if: needs.check.outputs.release == 'true'
+    runs-on: ubuntu-latest
+    container: fedora:latest
+    steps:
+      - run: dnf install -y git cargo rust gtk4-devel libadwaita-devel rpm-build systemd-rpm-macros desktop-file-utils appstream
+      - uses: actions/checkout@v4
+      - run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+      - run: cargo test --locked
+      - run: sh packaging/build-rpm.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rpm
+          path: dist/*.rpm
+
+  tarball:
+    needs: check
+    if: needs.check.outputs.release == 'true'
+    runs-on: ubuntu-latest
+    # Debian 13 has libadwaita 1.7 with an older glibc than Fedora, so the binaries run on more distributions.
+    container: debian:trixie
+    steps:
+      - run: apt-get update && apt-get install -y --no-install-recommends git curl ca-certificates build-essential pkg-config libgtk-4-dev libadwaita-1-dev
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: actions/checkout@v4
+      - run: sh packaging/build-tarball.sh
+      - uses: actions/upload-artifact@v4
+        with:
+          name: tarball
+          path: dist/*.tar.gz
+
+  publish:
+    needs: [check, rpm, tarball]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - name: Checksums and release notes
+        run: |
+          (cd dist && sha256sum * > SHA256SUMS)
+          V=${{ needs.check.outputs.version }}
+          awk -v v="$V" '$0 ~ "^## \\[" v "\\]" {on=1; next} /^## \[/ {on=0} on' CHANGELOG.md > notes.md
+          cat >> notes.md <<'NOTES'
+
+          ### Install
+
+          - **Fedora 42+**: `sudo dnf install ./opensound-*.x86_64.rpm`, then log out and back in and run `gnome-extensions enable opensound@cpujp.github.io`.
+          - **Other distributions** (GTK 4 and libadwaita ≥ 1.7): extract `opensound-*-linux.tar.gz` and run `sh install.sh`.
+
+          OpenSound is a non-profit community project and is not affiliated with Sony.
+          NOTES
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v${{ needs.check.outputs.version }}
+          name: OpenSound ${{ needs.check.outputs.version }}
+          target_commitish: ${{ github.sha }}
+          body_path: notes.md
+          files: dist/*
