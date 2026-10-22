@@ -4,6 +4,8 @@ All notable changes to this project are documented in this file. The format foll
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-10-22
+
 ### Added
 
 - Speak-to-chat in the app and the GNOME Shell extension: turn it on or off, and set the voice detection sensitivity and the time until the mode ends.

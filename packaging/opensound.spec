@@ -4,7 +4,7 @@
 %global uuid opensound@cpujp.github.io
 
 Name:           opensound
-Version:        0.3.2
+Version:        0.4.0
 Release:        1%{?dist}
 Summary:        Non-profit Linux controller for WH-1000XM5 headphones
 
@@ -72,6 +72,9 @@ cargo test --release --locked -p opensound-core -p opensound-daemon
 %{_datadir}/gnome-shell/extensions/%{uuid}/
 
 %changelog
+* Thu Oct 22 2026 Juan Pablo Giraldo Collazos - 0.4.0-1
+- Speak-to-chat settings in the app and the GNOME Shell extension
+
 * Thu Oct 22 2026 Juan Pablo Giraldo Collazos - 0.3.2-1
 - Power off the headphones from the app and the GNOME Shell extension
 
