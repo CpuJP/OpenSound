@@ -1,8 +1,0 @@
-[Desktop Entry]
-Name=OpenSound
-Comment=Control de auriculares Sony WH-1000XM5
-Exec=opensound
-Icon=audio-headphones
-Terminal=false
-Type=Application
-Categories=AudioVideo;Audio;Settings;
