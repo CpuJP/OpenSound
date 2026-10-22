@@ -1,0 +1,12 @@
+[Unit]
+Description=OpenSound daemon (Sony headphones control)
+After=graphical-session.target
+
+[Service]
+ExecStart=/usr/bin/python3 -m opensound.daemon
+Environment=PYTHONPATH=%h/.local/share/opensound
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=default.target

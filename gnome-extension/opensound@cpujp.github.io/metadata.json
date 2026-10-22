@@ -1,0 +1,11 @@
+{
+  "uuid": "opensound@cpujp.github.io",
+  "name": "OpenSound",
+  "description": "Battery indicator and quick controls for WH-1000XM5 headphones through the OpenSound service. Unofficial, not affiliated with Sony.",
+  "shell-version": [
+    "48",
+    "49",
+    "50"
+  ],
+  "url": "https://github.com/CpuJP/OpenSound"
+}
