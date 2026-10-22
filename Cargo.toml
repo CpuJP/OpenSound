@@ -1,0 +1,20 @@
+[workspace]
+resolver = "2"
+members = ["crates/opensound-core", "crates/opensound-daemon", "crates/opensound-gtk"]
+
+[workspace.package]
+version = "0.2.0"
+edition = "2021"
+license = "GPL-3.0-or-later"
+repository = "https://github.com/CpuJP/OpenSound"
+authors = ["Juan Pablo Giraldo Collazos"]
+rust-version = "1.92"
+
+[workspace.dependencies]
+opensound-core = { path = "crates/opensound-core" }
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+
+[profile.release]
+lto = true
+strip = true
