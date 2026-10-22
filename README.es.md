@@ -58,7 +58,7 @@ Cualquiera de los métodos instala lo mismo:
 
 - `opensound-daemon`: el servicio que mantiene la conexión con los auriculares. D-Bus lo inicia cuando hace falta y la unidad de usuario de systemd `opensound.service` lo mantiene activo.
 - La app **OpenSound**, en el menú de aplicaciones o con el comando `opensound`.
-- La extensión de GNOME Shell `opensound@cpujp.github.io`. Añade la batería a la barra superior y un botón en Ajustes rápidos.
+- La extensión de GNOME Shell `opensound@cpujp.github.io`. Añade a la barra superior un botón con la batería que abre una tarjeta de control (batería, control de ruido, nivel de sonido ambiente y voz enfocada), y un botón en Ajustes rápidos.
 
 En Wayland, cierra sesión y vuelve a entrar una vez. Después ejecuta `gnome-extensions enable opensound@cpujp.github.io`.
 

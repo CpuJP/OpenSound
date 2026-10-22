@@ -1,3 +1,92 @@
-.opensound-label {
-  padding-left: 2px;
+/* SPDX-License-Identifier: GPL-3.0-or-later */
+.opensound-panel-label {
+  padding-left: 4px;
+}
+
+.opensound-menu {
+  min-width: 320px;
+}
+
+.opensound-header {
+  spacing: 12px;
+  padding-top: 8px;
+  padding-bottom: 4px;
+}
+
+.opensound-avatar {
+  icon-size: 26px;
+  padding: 11px;
+  border-radius: 999px;
+  background-color: -st-accent-color;
+  color: -st-accent-fg-color;
+}
+
+.opensound-title {
+  font-weight: 800;
+  font-size: 1.15em;
+}
+
+.opensound-subtitle {
+  font-size: 0.9em;
+  color: rgba(127, 127, 127, 1);
+}
+
+.opensound-battery {
+  font-weight: 800;
+  font-size: 1.6em;
+}
+
+.opensound-battery-state {
+  spacing: 4px;
+}
+
+.opensound-battery-icon {
+  icon-size: 14px;
+  color: rgba(127, 127, 127, 1);
+}
+
+.opensound-bar {
+  height: 6px;
+  -barlevel-height: 6px;
+  -barlevel-background-color: rgba(127, 127, 127, 0.25);
+  -barlevel-active-background-color: -st-accent-color;
+  -barlevel-overdrive-separator-width: 0;
+}
+
+.opensound-bar.low {
+  -barlevel-active-background-color: #e01b24;
+}
+
+.opensound-modes {
+  spacing: 8px;
+}
+
+.opensound-mode {
+  padding: 10px 4px;
+  border-radius: 14px;
+  background-color: rgba(127, 127, 127, 0.15);
+}
+
+.opensound-mode:hover,
+.opensound-mode:focus {
+  background-color: rgba(127, 127, 127, 0.28);
+}
+
+.opensound-mode:checked {
+  background-color: -st-accent-color;
+  color: -st-accent-fg-color;
+}
+
+.opensound-mode-box {
+  spacing: 6px;
+}
+
+.opensound-mode-icon {
+  icon-size: 20px;
+}
+
+.opensound-level {
+  min-width: 2em;
+  text-align: right;
+  font-feature-settings: "tnum";
 }

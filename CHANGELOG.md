@@ -4,6 +4,10 @@ All notable changes to this project are documented in this file. The format foll
 
 ## [Unreleased]
 
+### Changed
+
+- The GNOME Shell extension now has its own top-bar button. It opens a control card with the battery level, the noise control modes, the ambient level and the focus on voice switch.
+
 ## [0.2.0] - 2026-10-22
 
 ### Changed

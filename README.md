@@ -61,7 +61,7 @@ Each method installs the same components:
 
 - `opensound-daemon`: the service that owns the connection to the headphones. D-Bus starts it on demand, and the systemd user unit `opensound.service` keeps it running.
 - The **OpenSound** app, in your application menu, or run `opensound`.
-- The GNOME Shell extension `opensound@cpujp.github.io`. It adds a battery indicator to the top bar and a Quick Settings toggle.
+- The GNOME Shell extension `opensound@cpujp.github.io`. It adds a top-bar button with the battery level that opens a control card (battery, noise control, ambient level and focus on voice), plus a Quick Settings toggle.
 
 On Wayland, log out and back in once. Then run `gnome-extensions enable opensound@cpujp.github.io`.
 
