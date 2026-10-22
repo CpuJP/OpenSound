@@ -4,7 +4,7 @@
 %global uuid opensound@cpujp.github.io
 
 Name:           opensound
-Version:        0.2.0
+Version:        0.3.1
 Release:        1%{?dist}
 Summary:        Non-profit Linux controller for WH-1000XM5 headphones
 
@@ -72,5 +72,8 @@ cargo test --release --locked -p opensound-core -p opensound-daemon
 %{_datadir}/gnome-shell/extensions/%{uuid}/
 
 %changelog
+* Thu Oct 22 2026 Juan Pablo Giraldo Collazos - 0.3.1-1
+- GNOME Shell extension: top-bar control card
+
 * Thu Oct 22 2026 Juan Pablo Giraldo Collazos - 0.2.0-1
 - Rewrite in Rust, D-Bus activation, confirmation dialogs, Fedora package
